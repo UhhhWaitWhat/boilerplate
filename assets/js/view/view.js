@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var request = require('superagent');
 var page = require('page');
 var hbs = require('handlebars');
+var ptr = require('path-to-regexp');
 var transition = require('./diff');
 var layout = require('./layout');
 
@@ -12,6 +13,7 @@ function View(url) {
 	EventEmitter.call(this);
 	this.data = {};
 	this.url = url;
+	this.regex = ptr(url);
 	this._template = this.fetchTemplate();
 	this.handlers = {};
 }
@@ -33,9 +35,9 @@ View.prototype.render = function() {
 	});
 };
 
-View.prototype.load = function() {
+View.prototype.load = function(path) {
 	var self = this;
-	return Promise.join(this._template, this.fetchData()).then(function() {
+	return Promise.join(this._template, this.fetchData(path)).then(function() {
 		self.emit('load');
 		self.render();
 		self.emit('loaded');
@@ -73,7 +75,7 @@ View.prototype.fetchTemplate = function() {
 			.end(function(err, res) {
 				if(err) return reject(err);
 				if(!res.ok) return reject(res);
-				if(res.headers['request-path'] !== self.url) {
+				if(!self.regex.test(res.headers['request-path'])) {
 					reject({redirect: res.headers['request-path']});
 				} else {
 					resolve(res.body.template);
@@ -84,16 +86,16 @@ View.prototype.fetchTemplate = function() {
 	});
 };
 
-View.prototype.fetchData = function() {
+View.prototype.fetchData = function(path) {
 	var self = this;
 	return new Promise(function(resolve, reject) {
 		request
-			.get(self.url)
+			.get(path)
 			.query({format: 'd'})
 			.end(function(err, res) {
 				if(err) return reject(err);
 				if(!res.ok) return reject(res);
-				if(res.headers['request-path'] !== self.url) {
+				if(res.headers['request-path'] !== path) {
 					self.redirected = true;
 					reject({redirect: res.headers['request-path']});
 				} else {

@@ -70,12 +70,12 @@ module.exports = function(pth, url) {
 	}
 
 	/* Render a specific view */
-	function* render(name) {
+	function* render(name, params) {
 		var layout = yield getLayout();
 		var template = yield getTemplate(name);
 		var data = {
 			layout: yield layout.fn.apply(this),
-			template: yield template.fn.apply(this)
+			template: yield template.fn.apply(this, params)
 		};
 
 		/* Assign data based on the request type */

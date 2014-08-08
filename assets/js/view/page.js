@@ -10,16 +10,16 @@ function attach(view) {
 function init() {
 	page('*', function (ctx) {
 		cache[ctx.pathname] = cache[ctx.pathname] || new View(ctx.pathname);
-		loadView(cache[ctx.pathname])();
+		loadView(cache[ctx.pathname])(ctx);
 	});
 	page();
 }
 
 function loadView(view) {
-	return function() {
+	return function(ctx) {
 		removeListeners();
 		view.emit('open');
-		view.load().then(function() {
+		view.load(ctx.pathname).then(function() {
 			for(var type in view.handlers) {
 				handlers.push({type: type, fn: view.handler.bind(view, type)});
 				document.body.addEventListener(type, handlers[handlers.length-1].fn);
