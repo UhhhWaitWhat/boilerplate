@@ -6,13 +6,13 @@
 <div class="container">
 	<div class="row">
 		<div class="list-group col-sm-3">
-			{{#each docs}}
-				<a style="cursor: pointer" class="list-group-item anim doc {{#if selected}}active{{/if}}" doc-id="{{name}}">{{name}}</a>
+			{{#each files}}
+				<a href="{{name}}" class="list-group-item anim doc {{#if selected}}active{{/if}}">{{name}}</a>
 			{{/each}}
 		</div>
 		<div class="col-sm-9">
 			{{#markdown}}
-				{{{selected.content}}}
+				{{{contents}}}
 			{{/markdown}}
 		</div>
 	</div>
