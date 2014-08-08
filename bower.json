@@ -1,0 +1,13 @@
+{
+  "name": "Boilerplate",
+  "main": "index.js",
+  "version": "0.0.1",
+  "private": true,
+  "authors": [
+    "Florian Albertz"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "~3.2.0"
+  }
+}

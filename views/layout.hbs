@@ -1,0 +1,14 @@
+<div class='navbar navbar-inverse navbar-fixed-top'>
+	<div class="container">
+		<div class="navbar-header">
+			<a class='navbar-brand'>A Koa App</a>
+		</div>
+		<ul class='nav navbar-nav navbar-left'>
+			<li><a href='/'>Home</a></li>
+			<li><a href='/docs'>Docs</a></li>
+			{{#unless user}}<li><a href='/login'>Login</a></li>{{/unless}}
+			{{#if user}}<li><a href='/logout'>Logout</a></li>{{/if}}
+		</ul>
+	</div>
+</div>
+{{{body}}}

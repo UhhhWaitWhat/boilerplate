@@ -1,0 +1,15 @@
+{
+	"esnext": true,
+	"undef": true,
+	"unused": true,
+	"browser": true,
+	"node": true,
+	"jquery": true,
+	"globals": {
+		"NAME": false,
+		"DEV": false,
+		"logger": false,
+		"config": false,
+		"services": false
+	}
+}

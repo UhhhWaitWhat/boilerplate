@@ -1,0 +1,19 @@
+<header class="jumbotron">
+	<div class="container">
+		<h1>Documentation {{#if layout.user}}({{layout.user.name}}){{/if}}</h1>
+	</div>
+</header>
+<div class="container">
+	<div class="row">
+		<div class="list-group col-sm-3">
+			{{#each docs}}
+				<a style="cursor: pointer" class="list-group-item anim doc {{#if selected}}active{{/if}}" doc-id="{{name}}">{{name}}</a>
+			{{/each}}
+		</div>
+		<div class="col-sm-9">
+			{{#markdown}}
+				{{{selected.content}}}
+			{{/markdown}}
+		</div>
+	</div>
+</div>

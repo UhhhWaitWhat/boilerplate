@@ -1,0 +1,10 @@
+<header class="jumbotron">
+	<div class="container">
+		<h1>Introduction {{#if layout.user}}({{layout.user.name}}){{/if}}</h1>
+	</div>
+</header>
+<div class="container">
+	{{#markdown}}
+	{{{readme}}}
+	{{/markdown}}
+</div>
