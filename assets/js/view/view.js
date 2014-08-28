@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var Promise = require('bluebird');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
@@ -6,40 +5,66 @@ var request = require('superagent');
 var page = require('page');
 var hbs = require('handlebars');
 var ptr = require('path-to-regexp');
-var transition = require('./diff');
 var layout = require('./layout');
+var diff = require('./diff');
 
 function View(url) {
 	EventEmitter.call(this);
 	this.data = {};
 	this.url = url;
 	this.regex = ptr(url);
-	this._template = this.fetchTemplate();
 	this.handlers = {};
+	this._template = this.fetchTemplate();
+	this._transitions = [];
 }
 
 util.inherits(View, EventEmitter);
 
-View.prototype.render = function() {
+View.prototype.diff = function(oldBody, newBody) {
+	/* We get messed up by empty class attributes, so remove them */
+	Array.prototype.slice.call(oldBody.querySelectorAll('[class=""]')).forEach(function(el) {
+		el.removeAttribute('class');
+	});
+
+	/* Run our diffing algorithm */
+	diff(oldBody, newBody);
+};
+
+View.prototype._transition = function(oldBody, newBody, from) {
+	var transition;
+	for(var x = 0; x<this._transitions.length; x++) {
+		transition = this._transitions[x];
+		if(transition.regex.test(from)) {
+			return transition.fn(oldBody, newBody);
+		}
+	}
+
+	return this.diff(oldBody, newBody);
+};
+
+View.prototype.transition = function(from, fn) {
+	this._transitions.push({
+		regex: ptr(from),
+		fn: fn.bind(this)
+	});
+};
+
+View.prototype.render = function(from) {
 	var self = this;
 	return layout.then(function(layout) {
 		var body = document.createElement('body');
 
 		self.data.layout.body = self.template(self.data);
 		body.innerHTML = layout(self.data.layout);
-		/* We get messed up by empty class attributes, so remove them */
-		Array.prototype.slice.call(document.body.querySelectorAll("[class='']")).forEach(function(el) {
-			el.removeAttribute('class');
-		});
-		return transition(document.body, body);
+		return this._transition(document.body, body, from);
 	});
 };
 
-View.prototype.load = function(path) {
+View.prototype.load = function(path, from) {
 	var self = this;
 	return Promise.join(this._template, this.fetchData(path)).then(function() {
 		self.emit('load');
-		self.render();
+		self.render(from);
 		self.emit('loaded');
 	}).catch(function(err) {
 		if(err && typeof err.redirect === 'string') {
