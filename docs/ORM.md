@@ -9,7 +9,7 @@ The adapter to be used can be configured in config.orm. You should have the spec
 
 Model Loading
 -------------
-Models are loaded from the `models` folder. They will have their adapter set to your configured one and will be named after your Filenames. Each file should export one model object.
+Models are loaded from the `models` folder. They will have their adapter set to your configured one and will be named after your Filenames. Each file should export one model object and if you use associations, you should remember that internally the model names are lowercased.
 
 Using the ORM
 -------------
@@ -17,7 +17,7 @@ The orm is, like all services, assigned to the global `services` variable. It is
 
 	var orm = yield services.orm;
 
-`orm` is now an instance of waterline. You may query it for any models and as the queries return promises, you may yield them like this:
+`orm` is now an object with all loaded Collection objects attached to it. You may query it for any models and as the queries return promises, you may yield them like this:
 
 	var user = yield orm.User.findOne(0);
 

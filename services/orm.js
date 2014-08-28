@@ -13,7 +13,7 @@ var waterline = new Waterline();
 
 /* Normalize and load our models */
 _(models).each(function(model, name) {
-	model.identity = name;
+	model.identity = name.toLowerCase();
 	model.connection = 'main';
 
 	logger.orm.debug('Registering model "'+name+'"');
