@@ -9,7 +9,7 @@ passport.deserializeUser(function(id, done) {
 	services.orm.then(function(ORM) {
 		return ORM.User.findOne(id);
 	}).then(function(user) {
-		done(null, user)
+		done(null, user);
 	}).catch(done);
 });
 

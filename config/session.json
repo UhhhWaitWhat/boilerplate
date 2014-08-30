@@ -1,7 +1,7 @@
 {
 	"keys": ["Please", "replace", "us"],
 	"redis": {
-		"host": "192.111.111.100",
+		"host": "localhost",
 		"port": 6379
 	}
 }
