@@ -41,7 +41,7 @@ function equaliseAttributes(from, to) {
 		}
 	}
 
-	for(var y = 0; y < src.length; y++) {
+	for(var y = 0; y < dest.length; y++) {
 		if(dest[y].value !== from.getAttribute(dest[y].name)) {
 			from.setAttribute(dest[y].name, dest[y].value);
 		}
