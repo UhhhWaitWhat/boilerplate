@@ -71,12 +71,14 @@ This view can then be attached to our client side router like this:
 
 	var page = require('./view/page');
 	page.attach(view);
+	//You could also use a shorthand like this
+	page.attach('/route2');
 
 And finally, once you have all your routes attached, you start your router:
 
 	page();
 
-Now, if you don't do any of this, your page will still work, but as a static page. Every view you create and attach will be loaded internally as template and data and will be rendered on the client side. This allows us to provide smoother transitions and faster load times for the user. Our router is based on [page.js]() takes care of redirects, and replacing links on your page, so after calling `page()` you do not have to care about routing anmore. You may however want to bind to events on your views to execute javascript code on arrival of new data or rendering of a view etc.
+Now, if you don't do any of this, your page will still work, but as a static page. Every view you create and attach will be loaded internally as template and data and will be rendered on the client side. This allows us to provide smoother transitions and faster load times for the user. Our router is based on [page.js](https://github.com/visionmedia/page.js) takes care of redirects, and replacing links on your page, so after calling `page()` you do not have to care about routing anmore. You may however want to bind to events on your views to execute javascript code on arrival of new data or rendering of a view etc.
 
 If you do not create/attach a view to any routes, but still call `page()`, views will be created for you on the fly for any non-bound routes. So if your view contains no client-side logic, you do not have to care about it at all.
 

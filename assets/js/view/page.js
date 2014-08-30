@@ -4,6 +4,7 @@ var handlers = [];
 var cache = {};
 
 function attach(view) {
+	if(typeof view === 'string') view = new View(view);
 	page(view.url, loadView(view));
 }
 
