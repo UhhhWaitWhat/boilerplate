@@ -1,3 +1,4 @@
+//Subclass our logger so we have more useful output
 logger.orm = global.logger.child({module: 'orm'});
 
 var _ = require('lodash');
@@ -8,10 +9,10 @@ var Waterline = require('waterline');
 var adapter = require(config.orm.adapter);
 var models = require('require-directory')(module, path.join(__dirname, '../models'));
 
-/* Instantiate our ORM */
+//Instantiate our ORM
 var waterline = new Waterline();
 
-/* Normalize and load our models */
+//Normalize and load our models
 _(models).each(function(model, name) {
 	model.identity = name.toLowerCase();
 	model.connection = 'main';
@@ -20,12 +21,14 @@ _(models).each(function(model, name) {
 	waterline.loadCollection(Waterline.Collection.extend(model));
 });
 
-/* Export promise */
+//Export a promise, so we can easily yield this later as
+//	var orm = yield services.orm
+//without actually instanciating it multiple times
 module.exports = new Promise(function(resolve, reject) {
 	var adapters = {};
 		adapters[config.orm.adapter] = adapter;
 
-	/* Initialize our orm */
+	//Initialize our orm 
 	waterline.initialize({
 		adapters: adapters,
 		connections: {
@@ -34,13 +37,14 @@ module.exports = new Promise(function(resolve, reject) {
 	}, function(err, orm) {
 		if(err) return reject(err);
 		
-		logger.orm.debug('ORM initialized with adapter "'+config.orm.adapter+'"');
+		//Assign all our capitalized collections to a new object
 		var ORM = _(orm.collections).reduce(function(sum, model, name) {
 			var normalizedName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 			sum[normalizedName] = model;
 			return sum;
 		}, {});
 
+		logger.orm.debug('ORM initialized with adapter "'+config.orm.adapter+'"');
 		resolve(ORM);
 	});
 });

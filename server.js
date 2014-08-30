@@ -1,14 +1,15 @@
-/* Create a local logger instance */
+//Create a local logger instance
 logger.koa = global.logger.child({module: 'koa'});
 
-/* Load our passport configuration */
+//Load our passport configuration
 require('./passport');
 
-/* Set up our koa instance and middleware*/
+//Set up our koa instance and define our name and application keys
 var app = require('koa')();
 app.keys = config.session.keys;
 app.name = NAME;
 
+//Bind all our middleware to our application
 app.use(require('koa-bunyan')(logger.koa));
 app.use(require('koa-error')());
 app.use(require('koa-gzip')());
@@ -26,11 +27,11 @@ app.use(require('koa-passport').initialize());
 app.use(require('koa-passport').session());
 app.use(require('./middleware/passport')('/', '/login', '/logout'));
 
-/* Bind our routes to our app */
+//Bind our routes to our app
 require('./routes')(app);
 
-/* Pipe our errors into bunyan as well */
+//Pipe our errors into bunyan as well
 app.on('error', logger.koa.error.bind(logger));
 
-/* Start our app */
+//Start our app
 app.listen(process.env.PORT || 3000);

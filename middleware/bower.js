@@ -10,11 +10,15 @@ var send = require('koa-send');
 module.exports = function(destJs, destCss, destAssets) {
 	var files = [], js = '', css = '', time = new Date(), bowerLoc = bowerLocation();
 
+	//Create the bundles for the first time and watch the bower location for changes
 	bundle();
 	watch(bowerLoc, function() {
 		bundle();
 	});
 
+	//Bundle our files together into the smallest possible outputs.
+	//We create streams to combine all files and then pipe those into a concatstream.
+	//We also timestamp the creation of our files for caching purposes
 	function bundle() {
 		var src = files = bower();
 		var jsStream = combinedStream.create();
@@ -44,6 +48,8 @@ module.exports = function(destJs, destCss, destAssets) {
 		cssStream.pipe(cssConcat);
 	}
 
+	//Rewrite urls in css files
+	//This is required, as we do not store bower assets relative to the bundled css
 	function rewriteUrl(filename) {
 		var regex = /url\(['"](.*?)['"]\)/g;
 		var basepath = filename.replace(bowerLoc, destAssets).split('/');
@@ -59,9 +65,11 @@ module.exports = function(destJs, destCss, destAssets) {
 				return 'url("'+targetURL+'")';
 			});
 			cb(null, result);
-		}
+		};
 	}
 
+	//Return a middleware function, which provides js and css bundles under their respective paths.
+	//In addition, it provides other assets under their own path, if available.
 	return function *(next) {
 		if(this.path === destJs) {
 			this.body = js;
@@ -73,19 +81,20 @@ module.exports = function(destJs, destCss, destAssets) {
 			this.type = 'text/css';
 		} else {
 			var asset = path.join(bowerLoc, this.path.substr(destAssets.length));
-			if(files.indexOf(asset) !== -1) {
+			if(this.path.substr(destAssets.length) === destAssets && files.indexOf(asset) !== -1) {
 				var pth = path.join(process.cwd(), asset);
 				yield send(this, pth);
 			} else {
 				yield next;
 			}
 		}
-	}
-}
+	};
+};
 
+//Find the location, of the directory, where bower stores its components
 function bowerLocation() {
 	try {
-		return JSON.parse(fs.readFileSync('.bowerrc', 'utf8')).directory
+		return JSON.parse(fs.readFileSync('.bowerrc', 'utf8')).directory;
 	} catch(e) {
 		return 'bower_components';
 	}

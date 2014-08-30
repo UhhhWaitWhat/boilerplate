@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt-nodejs');
 
+//Our basic model, as used by [Waterline](https://github.com/balderdashy/waterline)
 module.exports = {
 	attributes: {
 		name: {
@@ -28,6 +29,8 @@ module.exports = {
 	beforeUpdate: hashPassword
 };
 
+//Before saving the password to the database, hash it via use of `bcrypt`
+//This is important, so **DO NOT REMOVE OR SKIP THIS STEP EVER**
 function hashPassword(values, next) {
 	bcrypt.hash(values.password, bcrypt.genSaltSync(10), null, function(err, hash) {
 		if(err) return next(err);
