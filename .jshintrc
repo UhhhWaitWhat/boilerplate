@@ -5,6 +5,7 @@
 	"browser": true,
 	"node": true,
 	"jquery": true,
+	"noyield": true,
 	"globals": {
 		"NAME": false,
 		"DEV": false,
