@@ -1,147 +1,91 @@
-var l = require('./levenshtein');
+var async = require('async');
+var Promise = require('bluebird');
+var levenshtein = require('./levenshtein');
+var isEqual = require('./equal');
 
-function transition(current, next) {
-	if(current.isEqualNode(next)) return;
-	
-	if(isBlock(current)) {
-		replace(current, next);
-		return true;
-	} else {
-		var cChildren = Array.prototype.slice.call(current.children);
-		var nChildren = Array.prototype.slice.call(next.children);
-		var cText = Array.prototype.slice.call(current.childNodes).filter(function(el) {return el.nodeType === 3;});
-		var nText = Array.prototype.slice.call(next.childNodes).filter(function(el) {return el.nodeType === 3;});
+function transition(from, to, cb) {
+	if(isEqual(from, to)) return cb();
 
-		var tMatrix = l.matrix(nText, cText, function(a, b){return a.textContent === b.textContent;});
-		var cMatrix = l.matrix(nChildren, cChildren, isSame);
-		
-		if(cChildren.length > 0 && nChildren.length > 0) {
-			if(l.distance(cMatrix) > cChildren.length/2) {
-				replace(current, next);
-			} else {
-				applyDiff(l.diff(cMatrix, nChildren), cChildren, current);
-			}
+	if(from.children.length === 0 && to.children.length === 0) {
+		if(from.innerHTML !== to.innerHTML) {
+			replace(from, to, cb);
 		} else {
-			if(l.distance(tMatrix) > cText.length/2) {
-				replace(current, next);
-			} else {
-				applyTDiff(l.diff(tMatrix, nText), cText, current);
-			}
+			equaliseAttributes(from, to);
+			cb();
+		}
+	} else {
+		var childrenFrom = Array.prototype.slice.call(from.children);
+		var childrenTo = Array.prototype.slice.call(to.children);
+		var matrix = levenshtein.matrix(childrenFrom, childrenTo, isSame);
+		
+		if(!worthy(from, to, matrix)) {
+			replace(from, to, cb);
+		} else {
+			equaliseAttributes(from, to);
+			diffChildren(childrenFrom, childrenTo, matrix, from, cb);
 		}
 	}
+}
+
+function worthy(from, to, matrix) {
+	return levenshtein.distance(matrix) < from.children.length/2;
+}
+
+function equaliseAttributes(from, to) {
+	var src = Array.prototype.slice.call(from.attributes);
+	var dest = Array.prototype.slice.call(to.attributes);
+	
+	for(var x = 0; x < src.length; x++) {
+		if(!to.hasAttribute(src[x].name)) {
+			from.removeAttribute(src[x].name);
+		}
+	}
+
+	for(var y = 0; y < src.length; y++) {
+		if(dest[y].value !== from.getAttribute(dest[y].name)) {
+			from.setAttribute(dest[y].name, dest[y].value);
+		}
+	}
+}
+
+function diffChildren(childrenFrom, childrenTo, matrix, parent, cb) {
+	var differences = levenshtein.diff(matrix, childrenTo);
+
+	async.map(differences, function(difference, cb) {
+		var from = childrenFrom[difference.position];
+		var to = difference.value;
+
+		if(difference.type === ':') {
+			replace(from, to, cb);
+		} else if(difference.type === '+') {
+			insert(to, parent, difference.position);
+		} else if(difference.type === '-') {
+			remove(from, cb);
+		} else if(difference.type === '=') {
+			transition(from, to, cb);
+		}
+	}, cb);
 }
 
 function isSame(a, b) {
-	var trigger = true;
-	if(a.children.length === 0 && b.children.length === 0) {
-		trigger = a.innerHTML === b.innerHTML;
-	}
-
-	return a.nodeType === b.nodeType &&
-		a.id === b.id &&
-		classEqual(a, b) &&
-		attrEqual(a, b) &&
-		trigger;
+	return a.nodeName === b.nodeName &&
+			a.id === b.id &&
+			a.getAttribute('diff-id') === b.getAttribute('diff-id');
 }
 
-function isBlock(a) {
-	return a.hasAttribute('diff-block');
-}
+function replace(from, to, cb) {
+	var position = siblingCount(from);
+	var parent = from.parentNode;
 
-function classEqual(a, b) {
-	if(a.classList.length !== b.classList.length) return false;
-	for(var x = 0; x < a.classList.length; x++) {
-		if(!b.classList.contains(a.classList[x])) return false;
-	}
-	return true;
-}
-
-function attrEqual(a, b) {
-	if(a.attributes.length !== b.attributes.length) return false;
-	for(var x = 0; x < a.attributes.length; x++) {
-		if(a.attributes[x].name === 'class') continue;
-		if(a.attributes[x].value !== b.getAttribute(a.attributes[x].name)) return false;
-	}
-	return true;
-}
-
-function applyTDiff(diff, source, parent) {
-	for(var x = 0; x < diff.length; x++) {
-		switch(diff[x].type) {
-			case ':':
-				parent.replaceChild(diff[x].value, source[diff[x].position]);
-				break;
-			case '+':
-				if(source[diff[x].position]) {
-					parent.insertBefore(diff[x].value, source[diff[x].position]);
-				} else {
-					parent.appendChild(diff[x].value);
-				}
-
-				break;
-			case '-':
-				parent.removeChild(source[diff[x].position]);
-				break;
-		}
-	}
-}
-
-function applyDiff(diff, source, parent) {
-	function insert(el) {
-		if(source[diff[x].position]) {
-			parent.insertBefore(el, source[diff[x].position]);
-		} else {
-			parent.appendChild(el);
-		}
-	}
-
-	for(var x = 0; x < diff.length; x++) {
-		switch(diff[x].type) {
-			case ':':
-				replace(source[diff[x].position], diff[x].value);
-				break;
-			case '+':
-				add(diff[x].value, insert);
-				break;
-			case '-':
-				remove(source[diff[x].position]);
-				break;
-			case '=':
-				transition(source[diff[x].position], diff[x].value);
-				break;
-		}
-	}
-}
-
-function add(el, inject) {
-	enter(el, function() {
-		inject(el);
+	remove(from, function() {
+		insert(to, parent, position, cb);
 	});
 }
 
-function remove(el) {
-	exit(el, function() {
-		el.parentNode.removeChild(el);
-	});
-}
-
-function replace(old, next) {
-	exit(old, function() {
-		enter(next, function() {
-			old.parentNode.replaceChild(next, old);
-		});
-	});
-}
-
-function hasTransition(el) {
-	var style = getComputedStyle(el);
-	return typeof style.transition === 'string' && style['transitionProperty'] !== 'none';
-}
-
-function enter(el, action, cb) {
+function insert(el, parent, position, cb) {
 	el.classList.add('out');
-	action();
-	
+	parent.insertBefore(el, parent.children[position]);
+
 	setTimeout(function() {
 		el.classList.add('in');
 		el.classList.remove('out');
@@ -161,19 +105,32 @@ function enter(el, action, cb) {
 	}, 0);
 }
 
-function exit(el, cb) {
+function remove(el, cb) {
 	el.classList.add('out');
 
 	function listener() {
 		el.removeEventListener('transitionend', listener);
+		el.parentNode.removeChild(el);
 		cb();
 	}
 
 	if(hasTransition(el)) {
 		el.addEventListener('transitionend', listener);
 	} else {
+		el.parentNode.removeChild(el);
 		cb();
 	}
 }
 
-module.exports = transition;
+function hasTransition(el) {
+	var style = getComputedStyle(el);
+	return typeof style.transition === 'string' && style.transitionProperty !== 'none';
+}
+
+function siblingCount(el) {
+	var i = 0;
+	while((el = el.previousSibling)	!== null) i++;
+	return i;
+}
+
+module.exports = Promise.promisify(transition);

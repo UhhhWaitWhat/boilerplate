@@ -14,6 +14,7 @@
     "add": "node --harmony index.js add"
   },
   "dependencies": {
+    "async": "^0.9.0",
     "autoprefixer": "^2.2.0",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^2.3.2",
