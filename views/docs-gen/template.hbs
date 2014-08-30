@@ -1,0 +1,30 @@
+<header class="jumbotron">
+	<div class="container">
+		<h1>Docco {{#if layout.user}}({{layout.user.name}}){{/if}}</h1>
+	</div>
+</header>
+<div class="container">
+	<div class="row">
+		<div class="list-group col-sm-3">
+			{{#each folders}}
+				<a href="{{name}}" class="list-group-item"><span class="glyphicon glyphicon-folder-close"></span> {{name}}</a>
+			{{/each}}
+			{{#each files}}
+				<a href="{{name}}" class="list-group-item anim{{#if selected}} active{{/if}}"><span class="glyphicon glyphicon-file"></span> {{name}}</a>
+			{{/each}}
+		</div>
+		<div class="col-sm-9">
+			<ol class="breadcrumb">
+				{{#each path}}
+					<li{{#if last}} class="active"{{/if}}>
+						{{#unless last}}
+							<a href="{{path}}">{{name}}</a>
+						{{else}}
+							{{name}}
+						{{/unless}}
+					</li>
+				{{/each}}
+			</ol>
+		</div>
+	</div>
+</div>
