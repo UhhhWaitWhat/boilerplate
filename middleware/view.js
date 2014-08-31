@@ -22,7 +22,10 @@ module.exports = function(pth, url) {
 			try {
 				cache[name].fn = require(path.join(process.cwd(), pth, name, 'data.js'));
 			} catch(e) {
-				cache[name].fn = function(cb) {cb();};
+				if(e.code !== 'MODULE_NOT_FOUND') {
+					logger.warn(e, 'Failed to load `data.js`');
+				}
+				cache[name].fn = function *() {};
 			}
 		}
 
@@ -108,6 +111,11 @@ module.exports = function(pth, url) {
 
 	/* Our middleware to attach a view */
 	return function* (next) {
+		var redirect = this.redirect;
+		this.redirect = function(path) {
+			redirect.call(this, path + (this.query.format ? '?format=' + this.query.format : ''));
+		};
+
 		this.view = render;
 		this.set('Request-Path', this.path);
 
