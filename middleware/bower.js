@@ -81,7 +81,7 @@ module.exports = function(destJs, destCss, destAssets) {
 			this.type = 'text/css';
 		} else {
 			var asset = path.join(bowerLoc, this.path.substr(destAssets.length));
-			if(this.path.substr(destAssets.length) === destAssets && files.indexOf(asset) !== -1) {
+			if(this.path.substr(0, destAssets.length) === destAssets && files.indexOf(asset) !== -1) {
 				var pth = path.join(process.cwd(), asset);
 				yield send(this, pth);
 			} else {
