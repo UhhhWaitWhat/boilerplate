@@ -129,7 +129,7 @@ function hasTransition(el) {
 
 function siblingCount(el) {
 	var i = 0;
-	while((el = el.previousSibling)	!== null) i++;
+	while((el = el.previousSibling)	!== null) if(el.nodeType === 1) i++;
 	return i;
 }
 
