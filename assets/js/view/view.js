@@ -8,11 +8,11 @@ var ptr = require('path-to-regexp');
 var layout = require('./layout');
 var diff = require('./diff');
 
-function View(url) {
+function View(url, requesturl) {
 	EventEmitter.call(this);
 	this.data = {};
-	this.url = url;
-	this.regex = ptr(url);
+	this.url = requesturl ? requesturl : url;
+	this.regex = url instanceof RegExp ? url : ptr(url);
 	this.handlers = {};
 	this._template = this.fetchTemplate();
 	this._transitions = [];

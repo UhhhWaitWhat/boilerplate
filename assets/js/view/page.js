@@ -3,8 +3,8 @@ var View = require('./view');
 var handlers = [];
 var cache = {};
 
-function attach(view) {
-	if(typeof view === 'string') view = new View(view);
+function attach(view, requesturl) {
+	if(typeof view === 'string' || view instanceof RegExp) view = new View(view, requesturl);
 	page(view.url, loadView(view));
 }
 
@@ -27,7 +27,7 @@ function loadView(view) {
 			}
 			view.emit('opened');
 		});
-	}
+	};
 }
 
 function removeListeners() {
@@ -41,4 +41,4 @@ function removeListeners() {
 module.exports = {
 	attach: attach,
 	init: init
-}
+};
