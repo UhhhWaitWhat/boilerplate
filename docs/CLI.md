@@ -11,4 +11,4 @@ After all a full server start in production mode, with logging output on the com
 
 	NODE_ENV='production' node --harmony index.js start | bunyan
 
-To make this a little simpler, `node --harmony index.js start | bunyan` can be called as `npm start`.
+To make this a little simpler, you can also call `npm start` and `npm run-script add` respectively.

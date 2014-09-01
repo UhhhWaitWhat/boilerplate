@@ -4,7 +4,7 @@ Our custom middleware does its best to simplify asset serving for you. In additi
 
 Bower
 =====
-Bower modules are installed to `assets/bower` and all their main files are compiled and served under `/js/deps` and `/css/deps` respectively. Note that these paths are the complete paths to the bundles.
+Bower modules are installed to `assets/bower` and all their main files are compiled and served under `/js/deps` and `/css/deps` respectively. Note that these paths are the complete paths to the bundles. Any other bower-assets are served under `/deps` (fonts, images etc.).
 
 CSS/SCSS/SASS
 =============
@@ -12,7 +12,7 @@ In the folder 'assets/sass' you will find a file `index.scss`. This file will be
 
 CommonJS
 ========
-Similarly to the SASS index file, you will find a `assets/js/index.js` file. This file will be run through [browserify](http://browserify.org/) and served as `/js`.
+Similarly to the SASS index file, you will find an `assets/js/index.js` file. This file will be run through [browserify](http://browserify.org/) and served as `/js`.
 
 Polyfills
 =========

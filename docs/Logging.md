@@ -6,7 +6,7 @@ Normally I would advise against using globals, but in the case of this applicati
 
 Child Loggers
 -------------
-We use bunyans concept of child loggers to structure our logging output. If you have a module, service or middleware which should log something, you should instanciate a new child logger like this:
+We use bunyans concept of child loggers to structure our logging output. If you have a module, service or middleware which should log something, you should instantiate a new child logger like this:
 
 	var logger = global.logger.child({module: modulename});
 
@@ -16,8 +16,8 @@ We use bunyans concept of child loggers to structure our logging output. If you 
 
 And then use it for our models:
 
-	var logger = logger.orm.child({model: 'User'});
+	var logger = global.logger.orm.child({model: 'User'});
 
 Log Levels
 ----------
-In production mode, we log everything up to `trace`. In production we log only up to `info`.
+In development mode, we log everything up to `trace`. In production we log only up to `info`.
