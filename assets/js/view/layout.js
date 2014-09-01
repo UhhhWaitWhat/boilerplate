@@ -2,6 +2,7 @@ var request = require('superagent');
 var Promise = require('bluebird');
 var hbs = require('handlebars');
 
+//Export a promise representing our applications layout.
 module.exports = new Promise(function(resolve, reject) {
 	request
 		.get('/')

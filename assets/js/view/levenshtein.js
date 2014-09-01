@@ -1,4 +1,6 @@
-function matrix(a, b, equal) {
+//This file provides methods to calculate the difference between to lists via use of the [Levenshtein Distance](http://en.wikipedia.org/wiki/Levenshtein_distance).
+//Calculate a full matrix from two lists, under use of an equality function. This function should return `true` if the elements are equal, `false` otherwise.
+function matrix(b, a, equal) {
 	var x, y, d = [[0]];
 	
 	for(x = 1; x < a.length+1; x++) {
@@ -27,10 +29,35 @@ function matrix(a, b, equal) {
 	return d;
 }
 
+//Shorthand to retrieve the Levenshtein Distance base on a previously calculated matrix
 function distance(m) {
 	return m[m.length-1][m[m.length-1].length-1];
 }
 
+//This function calculates the steps to take from one list to get the other. You should provide the matrix as well as the target list.
+//
+//**Example:**
+//```
+//var from = 'tree'.split('');
+//var to = 'freddy'.split('');
+//var eq = function(a, b) {return a === b;};
+//var matrix = l.matrix(from, to, eq);
+//var diff = l.diff(matrix, to);
+//```
+//*diff:*
+//```
+//[{ type: ':', value: 'f', position: 0 },
+// { type: '=', value: 'r', position: 1 },
+// { type: '=', value: 'e', position: 2 },
+// { type: '+', value: 'd', position: 3 },
+// { type: '+', value: 'd', position: 3 },
+// { type: ':', value: 'y', position: 3 } ]
+//```
+//Types:
+//* `:`: Replace
+//* `+`: Insert
+//* `-`: Remove
+//* `=`: Keep
 function diff(m, target) {
 	var result = [];
 	var x = m.length-1;
@@ -73,6 +100,7 @@ function diff(m, target) {
 	return result;
 }
 
+//Export our functions
 module.exports = {
 	matrix: matrix,
 	distance: distance,

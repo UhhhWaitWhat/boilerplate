@@ -21,11 +21,11 @@
 		<div id="breadcrumb" class="col-sm-9">
 			<ol class="breadcrumb">
 				{{#each path}}
-					<li diff-id="{{path}}"{{#if last}} class="active"{{/if}}>
+					<li diff-id="{{path}}">
 						{{#unless last}}
 							<a href="{{path}}{{#if last}}/{{/if}}">{{name}}</a>
 						{{else}}
-							{{name}}
+							<a href="{{path}}/">{{name}}</a>
 						{{/unless}}
 					</li>
 				{{/each}}
@@ -37,7 +37,7 @@
 			{{#each data}}
 			<div>
 				<div class="comments col-sm-3">
-					{{docsText}}
+					{{markdown docsText}}
 				</div>
 				<div class="code col-sm-9">
 					<pre><code>{{highlight codeText}}</code></pre>

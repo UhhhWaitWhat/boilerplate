@@ -3,11 +3,13 @@ var View = require('./view');
 var handlers = [];
 var cache = {};
 
+//Attach a view to its route
 function attach(view, requesturl) {
 	if(typeof view === 'string' || view instanceof RegExp) view = new View(view, requesturl);
 	page(view.url, loadView(view));
 }
 
+//Bind a catch-all route to `page.js` which generates new views on-the-fly. Then start `page.js`.
 function init() {
 	page('*', function (ctx) {
 		cache[ctx.pathname] = cache[ctx.pathname] || new View(ctx.pathname);
@@ -16,6 +18,7 @@ function init() {
 	page();
 }
 
+//Load a specific view and attach all the corresponding listeners. Also emit the `open`/`opened` events.
 function loadView(view) {
 	return function(ctx) {
 		removeListeners();
@@ -30,6 +33,7 @@ function loadView(view) {
 	};
 }
 
+//Remove all listeners
 function removeListeners() {
 	handlers.forEach(function(el) {
 		document.body.removeEventListener(el.type, el.fn);
@@ -38,6 +42,7 @@ function removeListeners() {
 	handlers = [];
 }
 
+//Export our public interface
 module.exports = {
 	attach: attach,
 	init: init

@@ -14,10 +14,11 @@ module.exports = function(pth, url) {
 	var cache = {};
 	var layoutCache = {};
 
+	//Fetch a template for a specific name. If it changed, load it from disk again
 	function* getTemplate(name) {
 		cache[name] = cache[name] || {time: 0};
 
-		/* Load the data function if available */
+		//Load the data function if available
 		if(!cache[name].fn) {
 			try {
 				cache[name].fn = require(path.join(process.cwd(), pth, name, 'data.js'));
@@ -29,7 +30,7 @@ module.exports = function(pth, url) {
 			}
 		}
 
-		/* Check the timestamp if we need to reload the template */
+		//Check the timestamp if we need to reload the template
 		var stats = yield thunkify(fs.lstat)(path.join(process.cwd(), pth, name, 'template.hbs'));
 		if(new Date(stats.mtime) > new Date(cache[name].time)) {
 			var template = yield thunkify(fs.readFile)(path.join(process.cwd(), pth, name, 'template.hbs'), 'utf8');
@@ -41,8 +42,9 @@ module.exports = function(pth, url) {
 		return cache[name];
 	}
 
+	//Fetch the layout and load from disk if changed
 	function* getLayout() {
-		/* Load the data function if available */
+		//Load the data function if available
 		if(!layoutCache.fn) {
 			try {
 				layoutCache.fn = require(path.join(process.cwd(), pth, 'layout.js'));
@@ -51,13 +53,13 @@ module.exports = function(pth, url) {
 			}
 		}
 
-		/* Check for timestamps and update if needed */
+		//Check for timestamps and update if needed
 		var stats = {
 			layout: yield thunkify(fs.lstat)(path.join(process.cwd(), pth, 'layout.hbs')),
 			frame: yield thunkify(fs.lstat)(path.join(process.cwd(), pth, 'frame.hbs'))
 		};
 
-		/* Compare the times */
+		//Compare the times
 		layoutCache.times = layoutCache.times || {layout: 0, frame: 0};
 		if(new Date(stats.layout.mtime) > new Date(layoutCache.times.layout)) {
 			layoutCache.times.layout = stats.layout.mtime;
@@ -72,7 +74,7 @@ module.exports = function(pth, url) {
 		return layoutCache;
 	}
 
-	/* Render a specific view */
+	//Render a specific view
 	function* render(name, params) {
 		var layout = yield getLayout();
 		var template = yield getTemplate(name);
@@ -81,7 +83,7 @@ module.exports = function(pth, url) {
 			template: yield template.fn.apply(this, params)
 		};
 
-		/* Assign data based on the request type */
+		//Assign data based on the request type
 		var result;
 		if(this.request.query.format) {
 			if(this.request.query.format.indexOf('d') !== -1) {
@@ -101,7 +103,7 @@ module.exports = function(pth, url) {
 			}
 		}
 	
-		/* Attach either the data or a rendered view */
+		//Attach either the data or a rendered view
 		this.body = result || layout.frame({
 			body: layout.compiled(_.merge({
 				body: template.compiled(_.merge(data.template, {layout: data.layout}))
@@ -109,7 +111,7 @@ module.exports = function(pth, url) {
 		});
 	}
 
-	/* Our middleware to attach a view */
+	//Our middleware to attach a view
 	return function* (next) {
 		var redirect = this.redirect;
 		this.redirect = function(path) {
@@ -129,6 +131,8 @@ module.exports = function(pth, url) {
 	};
 };
 
+//Compile our handlebars helpers from a specific path and then run them through browserify
+//Allows us to serve them to the client
 function compileHelpers(pth) {
 	return new Promise(function(resolve, reject) {
 		var filenames = fs.readdirSync(path.join(pth, 'helpers'));
@@ -149,8 +153,8 @@ function compileHelpers(pth) {
 	});
 }
 
+//Register our handlebars helpers
 function assignHelpers(pth) {
-	/* Register our handlebars helpers */
 	var helpers = require('require-directory')(module, path.join(pth, 'helpers'));
 	_.each(helpers, function(helper, name) {
 		name = name.split('.')[0];

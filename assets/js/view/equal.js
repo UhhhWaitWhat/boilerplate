@@ -1,3 +1,4 @@
+//Determine if two elements are `equal`. For the differentiation between `same` and `equal` check the handwritten documentation.
 function isEqual(a, b) {
 	return a.nodeName === b.nodeName &&
 			textEqual(a, b) &&
@@ -6,6 +7,8 @@ function isEqual(a, b) {
 			childEqual(a, b);
 }
 
+//Determine if two elements are textually equal.
+//This automatically assumes elements with at least one child element to contain no text nodes.
 function textEqual(a, b) {
 	if(a.children.length === 0 && b.children.length === 0) {
 		return a.textContent === b.textContent;
@@ -14,6 +17,7 @@ function textEqual(a, b) {
 	return true;
 }
 
+//Determine if two elements have exactly the same classes
 function classEqual(a, b) {
 	if(a.classList.length !== b.classList.length) return false;
 
@@ -24,6 +28,7 @@ function classEqual(a, b) {
 	return true;
 }
 
+//Determine if two elements have equal child elements (order is checked as well).
 function childEqual(a, b) {
 	if(a.children.length !== b.children.length) return false;
 
@@ -34,6 +39,7 @@ function childEqual(a, b) {
 	return true;
 }
 
+//Determine if two elements have identical attributes (with the exception of the `class` attribute).
 function attrEqual(a, b) {
 	if(a.attributes.length !== b.attributes.length) return false;
 	

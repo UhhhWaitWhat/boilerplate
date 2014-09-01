@@ -8,6 +8,8 @@ var ptr = require('path-to-regexp');
 var layout = require('./layout');
 var diff = require('./diff');
 
+//Our view class. `url` should either be the same as used in the backend (a express-like route, or a RegExp).
+//`requesturl` is only required if `url` is a regex, and is used to fetch the views template.
 function View(url, requesturl) {
 	EventEmitter.call(this);
 	this.data = {};
@@ -20,7 +22,7 @@ function View(url, requesturl) {
 
 util.inherits(View, EventEmitter);
 
-/* Calls the corresponding transition function */
+//Calls the corresponding transition function
 View.prototype._transition = function(oldBody, newBody, from) {
 	var transition;
 	for(var x = 0; x<this._transitions.length; x++) {
@@ -33,7 +35,7 @@ View.prototype._transition = function(oldBody, newBody, from) {
 	return diff(oldBody, newBody);
 };
 
-/* Attach a new transition from a specific state */
+//Attach a new transition from a specific state
 View.prototype.transition = function(from, fn) {
 	this._transitions.push({
 		regex: ptr(from),
@@ -41,7 +43,7 @@ View.prototype.transition = function(from, fn) {
 	});
 };
 
-/* Render the current data to the view */
+//Render the current data to the view
 View.prototype.render = function(from) {
 	var self = this;
 	return layout.then(function(layout) {
@@ -53,7 +55,7 @@ View.prototype.render = function(from) {
 	});
 };
 
-/* Load new data and render the view */
+//Load new data and render the view
 View.prototype.load = function(path, from) {
 	var self = this;
 	return Promise.join(this._template, this.fetchData(path)).then(function() {
@@ -70,7 +72,7 @@ View.prototype.load = function(path, from) {
 	});
 };
 
-/* Attaches a new handler for a given type and selector */
+//Attaches a new handler for a given type and selector
 View.prototype.attach = function(type, selector, handler) {
 	this.handlers[type] = this.handlers[type] || [];
 	this.handlers[type].push({
@@ -79,7 +81,7 @@ View.prototype.attach = function(type, selector, handler) {
 	});
 };
 
-/* Call all handlers which match the event target and the given type */
+//Call all handlers which match the event target and the given type
 View.prototype.handler = function(type, event) {
 	this.handlers[type].forEach(function(el) {
 		if(event.target.matches(el.selector)) {
@@ -88,7 +90,7 @@ View.prototype.handler = function(type, event) {
 	});
 };
 
-/* Fetch template and attach it to the view in compiled form */
+//Fetch template and attach it to the view in compiled form
 View.prototype.fetchTemplate = function() {
 	var self = this;
 	return new Promise(function(resolve, reject) {
@@ -109,7 +111,7 @@ View.prototype.fetchTemplate = function() {
 	});
 };
 
-/* Fetch data and attach it to our view */
+//Fetch data and attach it to our view
 View.prototype.fetchData = function(path) {
 	var self = this;
 	return new Promise(function(resolve, reject) {
