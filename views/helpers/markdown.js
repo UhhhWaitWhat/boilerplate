@@ -11,8 +11,14 @@ marked.setOptions({
 
 //Export our helper function
 module.exports = function(context) {
-	//Split at newlines, so we can detect the indentation level of the first line and set it to 0
-	var arr = context.fn(context.data.root).split('\n');
+	var data;
+	if(arguments.length === 1) {
+		data = context.fn(context.data.root);
+	} else {
+		data = context;
+	}
+	//Split at newlines, so we can detect the indentation level of the first line and set it to 0.
+	var arr = data.split('\n');
 	var moved = /^([ \t]*)/.exec(arr[0])[1].length;
 	arr[0] = arr[0].substr(moved);
 
