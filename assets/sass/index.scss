@@ -1,5 +1,6 @@
 @import 'layout';
 @import 'highlight';
+@import 'docs-gen';
 
 .in {
 	transition: opacity 100ms;
@@ -11,10 +12,10 @@
 }
 
 .anim.in {
-	transition: none;
+	transition: none !important;
 }
 
 .anim.out {
 	opacity: 0;
-	transition: none;
+	transition: none !important;
 }

@@ -3,28 +3,47 @@
 		<h1>Docco {{#if layout.user}}({{layout.user.name}}){{/if}}</h1>
 	</div>
 </header>
-<div class="container">
-	<div class="row">
-		<div id="navigation" class="list-group col-sm-3">
-			{{#each folders}}
-				<a diff-id="d{{name}}" href="{{name}}" class="list-group-item"><span class="glyphicon glyphicon-folder-close"></span> {{name}}</a>
-			{{/each}}
-			{{#each files}}
-				<a diff-id="f{{name}}" href="{{name}}" class="list-group-item anim{{#if selected}} active{{/if}}"><span class="glyphicon glyphicon-file"></span> {{name}}</a>
-			{{/each}}
+<div id="wrapper">
+	<div id="nav" class="row">
+		<div id="navigation" class="col-sm-3">
+			<div class="panel panel-default">
+				<div diff-id="header" class="panel-heading">Children<span class="caret"></span></div>
+				<div diff-id="list" class="list-group anim">
+				{{#each folders}}
+					<a diff-id="d{{name}}" href="{{name}}/" class="list-group-item"><span class="glyphicon glyphicon-folder-close"></span> {{name}}</a>
+				{{/each}}
+				{{#each files}}
+					<a diff-id="f{{name}}" href="{{name}}" class="list-group-item anim{{#if selected}} active{{/if}}"><span class="glyphicon glyphicon-file"></span> {{name}}</a>
+				{{/each}}
+				</div>
+			</div>
 		</div>
-		<div id="content" class="col-sm-9">
+		<div id="breadcrumb" class="col-sm-9">
 			<ol class="breadcrumb">
 				{{#each path}}
 					<li diff-id="{{path}}"{{#if last}} class="active"{{/if}}>
 						{{#unless last}}
-							<a href="{{path}}">{{name}}</a>
+							<a href="{{path}}{{#if last}}/{{/if}}">{{name}}</a>
 						{{else}}
 							{{name}}
 						{{/unless}}
 					</li>
 				{{/each}}
 			</ol>
+		</div>
+	</div>
+	<div id="content" class="row">
+		<div class="content"diff-id="{{layout.path}}">
+			{{#each data}}
+			<div>
+				<div class="comments col-sm-3">
+					{{docsText}}
+				</div>
+				<div class="code col-sm-9">
+					<pre><code>{{highlight codeText}}</code></pre>
+				</div>
+			</div>
+			{{/each}}
 		</div>
 	</div>
 </div>
