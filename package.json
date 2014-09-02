@@ -11,7 +11,8 @@
   "engineStrict": true,
   "scripts": {
     "start": "node --harmony index.js start | bunyan",
-    "add": "node --harmony index.js add"
+    "add": "node --harmony index.js add",
+    "test": "mocha --harmony && jshint . --reporter node_modules/jshint-stylish/stylish.js"
   },
   "dependencies": {
     "async": "^0.9.0",
@@ -59,5 +60,12 @@
     "thunkify": "^2.1.2",
     "watchify": "^0.10.2",
     "waterline": "^0.10.9"
+  },
+  "devDependencies": {
+    "co-mocha": "^1.0.1",
+    "jshint": "^2.5.5",
+    "jshint-stylish": "^0.4.0",
+    "mocha": "^1.21.4",
+    "must": "^0.12.0"
   }
 }
