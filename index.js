@@ -1,23 +1,7 @@
-//Enable sensible stacktraces for promises
-process.env.BLUEBIRD_DEBUG = 1;
-
+var setup = require('./server/setup');
 var program = require('commander');
 var inquirer = require('inquirer');
 var pkg = require('./package.json');
-
-//Makes config, services, logger and environment available globally
-function setup() {
-	global.NAME = require('./package.json').name;
-	global.BASEPATH = process.env.BASEPATH || '';
-	global.DEV = process.env.NODE_ENV !== 'production';
-	global.logger = require('bunyan').createLogger({
-		name: NAME,
-		level: DEV ? 'trace' : 'info',
-		src: DEV
-	});
-	global.config = require('require-directory')(module, './config');
-	global.services = require('require-directory')(module, './services');
-}
 
 //Setup our cli
 program.version(pkg.version);
@@ -28,7 +12,7 @@ program
 	.description('Start the server')
 	.action(function() {
 		setup();
-		require('./server.js');
+		require('./server/koa.js');
 	});
 
 //Allow adding of a new user
