@@ -1,3 +1,5 @@
+[![Build Status](https://img.shields.io/travis/PaulAvery/boilerplate.svg?style=flat)](https://travis-ci.org/PaulAvery/boilerplate)
+
 A Webapp Boilerplate
 ====================
 After several attempts at using different Web Application frameworks, I decided to give writing my own one a shot. It solves some of the problems I had with other frameworks and is tailored to my specific needs, but I hope it might prove useful to some other people as well.
