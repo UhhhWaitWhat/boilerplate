@@ -20,7 +20,8 @@ module.exports = function(destJs, destCss, destAssets) {
 	//We create streams to combine all files and then pipe those into a concatstream.
 	//We also timestamp the creation of our files for caching purposes
 	function bundle() {
-		var src = files = bower();
+		files = bower();
+		var src = files;
 		var jsStream = combinedStream.create();
 		var cssStream = combinedStream.create();
 

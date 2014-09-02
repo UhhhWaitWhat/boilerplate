@@ -2,7 +2,7 @@ var watch = require('node-watch');
 var sass = require('node-sass');
 var path = require('path');
 var prefixer = require('autoprefixer');
-var logger = global.logger.child({module: 'assets', asset:'css'});
+var log = logger.child({module: 'assets', asset:'css'});
 
 module.exports = function(src, dest) {
 	var cache = '', time = new Date();
@@ -20,10 +20,10 @@ module.exports = function(src, dest) {
 			success: function(result) {
 				cache = prefixer.process(result).css;
 				time = new Date();
-				logger.info('Recompiled sass (and added prefixes)');
+				log.info('Recompiled sass (and added prefixes)');
 			},
 			error: function(err) {
-				logger.error('Failed to compile sass', err);
+				log.error('Failed to compile sass', err);
 			}
 		});
 	}
@@ -37,5 +37,5 @@ module.exports = function(src, dest) {
 		} else {
 			yield next;
 		}
-	}
-}
+	};
+};

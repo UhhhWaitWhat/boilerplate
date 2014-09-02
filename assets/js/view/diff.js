@@ -1,5 +1,5 @@
 var async = require('async');
-var Promise = require('bluebird');
+var bluebird = require('bluebird');
 var levenshtein = require('./levenshtein');
 var isEqual = require('./equal');
 
@@ -143,4 +143,4 @@ function siblingCount(el) {
 	return i;
 }
 
-module.exports = Promise.promisify(transition);
+module.exports = bluebird.promisify(transition);

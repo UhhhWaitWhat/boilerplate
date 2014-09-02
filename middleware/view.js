@@ -1,4 +1,3 @@
-var Promise = require('bluebird');
 var hbs = require('handlebars');
 var thunkify = require('thunkify');
 var fs = require('fs');
@@ -6,7 +5,7 @@ var path = require('path');
 var browserify = require('browserify');
 var es = require('event-stream');
 var _ = require('lodash');
-var logger = global.logger.child({module: 'views'});
+var log = logger.child({module: 'views'});
 
 module.exports = function(pth, url) {
 	assignHelpers(pth);
@@ -24,7 +23,7 @@ module.exports = function(pth, url) {
 				cache[name].fn = require(path.join(process.cwd(), pth, name, 'data.js'));
 			} catch(e) {
 				if(e.code !== 'MODULE_NOT_FOUND') {
-					logger.warn(e, 'Failed to load `data.js`');
+					log.warn(e, 'Failed to load `data.js`');
 				}
 				cache[name].fn = function *() {};
 			}
@@ -163,7 +162,7 @@ function assignHelpers(pth) {
 		name = name.split('.')[0];
 		if(!hbs.helpers[name]) {
 			hbs.registerHelper(name, helper);
-			logger.info('Loaded helper "' + name + '"');
+			log.info('Loaded helper "' + name + '"');
 		}
 	});
 }

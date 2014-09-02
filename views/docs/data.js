@@ -1,5 +1,5 @@
-var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require('fs'));
+var bluebird = require('bluebird');
+var fs = bluebird.promisifyAll(require('fs'));
 var path = require('path');
 
 //Read the contents of the `docs` folder asynchronously.

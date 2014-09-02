@@ -1,6 +1,6 @@
 'use strict';
-var Promise = require('bluebird');
-var fs = Promise.promisifyAll(require('fs'));
+var bluebird = require('bluebird');
+var fs = bluebird.promisifyAll(require('fs'));
 var glob = require('glob');
 var multimatch = require('multimatch');
 var path = require('path');
@@ -92,8 +92,8 @@ function allFiles() {
 	}).catch(function() {
 		return ['**/*'];
 	}).then(function(gitignore) {
-		return Promise.promisify(glob)('**/*.js').then(function(files) {
-			return Promise.promisify(glob)('**/*/').then(function(folders) {
+		return bluebird.promisify(glob)('**/*.js').then(function(files) {
+			return bluebird.promisify(glob)('**/*/').then(function(folders) {
 				return folders.concat(files);
 			});
 		}).then(function(files) {

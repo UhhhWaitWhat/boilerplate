@@ -1,4 +1,4 @@
-var Promise = require('bluebird');
+var bluebird = require('bluebird');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var request = require('superagent');
@@ -58,7 +58,7 @@ View.prototype.render = function(from) {
 //Load new data and render the view
 View.prototype.load = function(path, from) {
 	var self = this;
-	return Promise.join(this._template, this.fetchData(path)).then(function() {
+	return bluebird.join(this._template, this.fetchData(path)).then(function() {
 		self.emit('load');
 		return self.render(from);
 	}).then(function() {

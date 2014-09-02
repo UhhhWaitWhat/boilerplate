@@ -8,7 +8,7 @@ Child Loggers
 -------------
 We use bunyans concept of child loggers to structure our logging output. If you have a module, service or middleware which should log something, you should instantiate a new child logger like this:
 
-	var logger = global.logger.child({module: modulename});
+	var log = logger.child({module: modulename});
 
 `modulename` should be something unique to identify your module/service/middleware. For services which have subinstances, you may want to consider attaching your child logger to the global logger object so you do not have to pass it around. We do this for our ORM like this:
 
@@ -16,7 +16,7 @@ We use bunyans concept of child loggers to structure our logging output. If you 
 
 And then use it for our models:
 
-	var logger = global.logger.orm.child({model: 'User'});
+	var log = logger.orm.child({model: 'User'});
 
 Log Levels
 ----------

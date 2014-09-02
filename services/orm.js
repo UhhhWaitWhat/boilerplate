@@ -3,7 +3,6 @@ logger.orm = global.logger.child({module: 'orm'});
 
 var _ = require('lodash');
 var path = require('path');
-var Promise = require('bluebird');
 var Waterline = require('waterline');
 
 var adapter = require(config.orm.adapter);

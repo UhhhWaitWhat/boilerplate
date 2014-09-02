@@ -1,5 +1,5 @@
 var watchify = require('watchify');
-var logger = global.logger.child({module: 'assets', asset:'js'});
+var log = logger.child({module: 'assets', asset:'js'});
 
 module.exports = function(src, dest, excludeHbs) {
 	//Setup our cache, timestamp and watchify instance
@@ -20,9 +20,9 @@ module.exports = function(src, dest, excludeHbs) {
 			if(!err) {
 				cache = 'BASEPATH=\''+BASEPATH+'\';' + bundle;
 				time = new Date();
-				logger.info('Rebuilt js bundle');
+				log.info('Rebuilt js bundle');
 			} else {
-				logger.warn('Failed to build js bundle', err);
+				log.warn('Failed to build js bundle', err);
 			}
 		});
 	}
