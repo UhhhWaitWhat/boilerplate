@@ -10,6 +10,7 @@ app.keys = config.session.keys;
 app.name = NAME;
 
 //Bind all our middleware to our application
+app.use(require('./middleware/basepath'));
 app.use(require('koa-bunyan')(logger.koa));
 app.use(require('koa-error')());
 app.use(require('koa-gzip')());

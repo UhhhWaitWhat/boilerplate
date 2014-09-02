@@ -10,7 +10,7 @@
 				<a href="{{name}}" class="list-group-item anim{{#if selected}} active{{/if}}">{{name}}</a>
 			{{/each}}
 		</div>
-		<div class="col-sm-9">
+		<div id="{{layout.path}}" class="col-sm-9">
 			{{#markdown}}
 				{{{contents}}}
 			{{/markdown}}

@@ -18,7 +18,7 @@ module.exports = function(src, dest, excludeHbs) {
 		if(excludeHbs) w.exclude('handlebars');
 		w.bundle(function(err, bundle) {
 			if(!err) {
-				cache = bundle;
+				cache = 'BASEPATH=\''+BASEPATH+'\';' + bundle;
 				time = new Date();
 				logger.info('Rebuilt js bundle');
 			} else {

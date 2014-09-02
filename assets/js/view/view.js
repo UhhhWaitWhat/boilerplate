@@ -13,7 +13,7 @@ var diff = require('./diff');
 function View(url, requesturl) {
 	EventEmitter.call(this);
 	this.data = {};
-	this.url = requesturl ? requesturl : url;
+	this.url = BASEPATH + (requesturl || url);
 	this.regex = url instanceof RegExp ? url : ptr(url);
 	this.handlers = {};
 	this._template = this.fetchTemplate();

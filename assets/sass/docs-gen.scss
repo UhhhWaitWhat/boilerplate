@@ -28,10 +28,15 @@
 	position: absolute;
 	width: 100%;
 	top: -30px;
+	margin-left: -7.5px;
 }
 
 .content>div:first-child>.comments, .content>div:first-child>.code{
 	padding-top: 93px;
+}
+
+.content>div {
+	padding-left: 7.5px;
 }
 
 .code{

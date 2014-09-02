@@ -82,6 +82,7 @@ module.exports = function(pth, url) {
 			layout: yield layout.fn.apply(this),
 			template: yield template.fn.apply(this, params)
 		};
+		data.layout.basepath = BASEPATH;
 
 		//Assign data based on the request type
 		var result;
@@ -105,6 +106,7 @@ module.exports = function(pth, url) {
 	
 		//Attach either the data or a rendered view
 		this.body = result || layout.frame({
+			basepath: BASEPATH,
 			body: layout.compiled(_.merge({
 				body: template.compiled(_.merge(data.template, {layout: data.layout}))
 			}, data.layout))
@@ -114,8 +116,9 @@ module.exports = function(pth, url) {
 	//Our middleware to attach a view
 	return function* (next) {
 		var redirect = this.redirect;
-		this.redirect = function(path) {
-			redirect.call(this, path + (this.query.format ? '?format=' + this.query.format : ''));
+		//Monkeypatch redirect to preserve our format parameter
+		this.redirect = function(path, alt) {
+			redirect.call(this, path + (this.query.format ? '?format=' + this.query.format : ''), alt);
 		};
 
 		this.view = render;

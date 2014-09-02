@@ -60,7 +60,7 @@ module.exports = function(destJs, destCss, destAssets) {
 			var str = data.toString();
 			var result = str.replace(regex, function() {
 				var srcUrl = arguments[1];
-				var targetURL = basepath + '/' + srcUrl;
+				var targetURL = BASEPATH + basepath + '/' + srcUrl;
 
 				return 'url("'+targetURL+'")';
 			});

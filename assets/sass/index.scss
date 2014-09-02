@@ -2,6 +2,10 @@
 @import 'highlight';
 @import 'docs-gen';
 
+body {
+	overflow-x: hidden;
+}
+
 .in {
 	transition: opacity 100ms;
 }

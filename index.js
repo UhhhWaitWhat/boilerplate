@@ -8,6 +8,7 @@ var pkg = require('./package.json');
 //Makes config, services, logger and environment available globally
 function setup() {
 	global.NAME = require('./package.json').name;
+	global.BASEPATH = process.env.BASEPATH || '';
 	global.DEV = process.env.NODE_ENV !== 'production';
 	global.logger = require('bunyan').createLogger({
 		name: NAME,

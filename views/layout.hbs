@@ -4,18 +4,18 @@
 			<a class='navbar-brand'>A Koa App</a>
 		</div>
 		<ul class='nav navbar-nav navbar-left'>
-			<li><a href='/'>Home</a></li>
+			<li><a href='{{basepath}}/'>Home</a></li>
 			<li class="dropdown">
 				<a class="dropdown-toggle" data-toggle="dropdown">Docs <span class="caret"></span></a>
 				<ul class="dropdown-menu" role="menu">
-					<li><a href="/docs/written/">Written</a></li>
-					<li><a href="/docs/generated/">Generated</a></li>
+					<li><a href="{{basepath}}/docs/written">Written</a></li>
+					<li><a href="{{basepath}}/docs/generated/">Generated</a></li>
 				</ul>
 			</li>
 		</ul>
 		<ul class='nav navbar-nav navbar-right'>
-			{{#unless user}}<li><a href='/login'>Login</a></li>{{/unless}}
-			{{#if user}}<li><a href='/logout'>Logout</a></li>{{/if}}
+			{{#unless user}}<li><a href='{{basepath}}/login'>Login</a></li>{{/unless}}
+			{{#if user}}<li><a href='{{basepath}}/logout'>Logout</a></li>{{/if}}
 		</ul>
 	</div>
 </div>

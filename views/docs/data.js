@@ -17,7 +17,7 @@ module.exports = function *(doc) {
 
 	//If the file does not exist, redirect to the first existing one
 	if(!doc) {
-		this.redirect(this.path + '/' + Object.keys(data)[0]);
+		this.redirect(path.join(this.path, Object.keys(data)[0]).split(path.sep).join('/'));
 	} else {
 		return {
 			//Map filenames, so we can signal which one should be selected in the sidebar
