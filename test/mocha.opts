@@ -1,2 +1,3 @@
 --require must
 --require co-mocha
+--recursive
