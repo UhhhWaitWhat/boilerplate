@@ -1,14 +1,15 @@
-//Subclass our logger so we have more useful output
-logger.orm = global.logger.child({module: 'orm'});
-
 var _ = require('lodash');
 var path = require('path');
 var Waterline = require('waterline');
-
-var adapter = require(config.orm.adapter);
 var models = require('require-directory')(module, path.join(__dirname, '../models'));
 
 module.exports = function() {
+	//Get our adapter
+	var adapter = require(config.orm.adapter);
+
+	//Subclass our logger so we have more useful output
+	logger.orm = global.logger.child({module: 'orm'});
+
 	//Instantiate our ORM
 	var waterline = new Waterline();
 
