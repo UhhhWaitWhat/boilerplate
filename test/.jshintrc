@@ -1,7 +1,7 @@
 {
 	"extends": "../.jshintrc",
 	"globals": {
-		"it": false
+		"it": false,
 		"describe": false,
 		"before": false,
 		"after": false,
