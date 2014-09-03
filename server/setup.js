@@ -1,3 +1,4 @@
+var _ = require('lodash');
 //Enable sensible stacktraces for promises
 process.env.BLUEBIRD_DEBUG = 1;
 
@@ -12,5 +13,7 @@ module.exports = function() {
 		src: DEV
 	});
 	global.config = require('require-directory')(module, './config');
-	global.services = require('require-directory')(module, './services');
+	global.services = _(require('require-directory')(module, './services')).transform(function(obj, el, key) {
+		obj[key] = el();
+	}).value();
 };
