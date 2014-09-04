@@ -7,7 +7,7 @@ var isEqual = require('./equal');
 function transition(from, to, cb) {
 	if(isEqual(from, to)) return cb();
 
-	if(from.children.length === 0 && to.children.length === 0) {
+	if(from.children.length === 0 || to.children.length === 0) {
 		if(from.innerHTML !== to.innerHTML) {
 			replace(from, to, cb);
 		} else {

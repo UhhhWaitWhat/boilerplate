@@ -12,7 +12,7 @@ function attach(view, requesturl) {
 //Bind a catch-all route to `page.js` which generates new views on-the-fly. Then start `page.js`.
 function init() {
 	page('*', function (ctx) {
-		cache[ctx.pathname] = cache[ctx.pathname] || new View(ctx.pathname);
+		cache[ctx.pathname] = cache[ctx.pathname] || new View(ctx.pathname.substring(BASEPATH.length));
 		loadView(cache[ctx.pathname])(ctx);
 	});
 	page();

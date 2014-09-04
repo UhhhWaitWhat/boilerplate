@@ -121,8 +121,7 @@ View.prototype.fetchData = function(path) {
 			.end(function(err, res) {
 				if(err) return reject(err);
 				if(!res.ok) return reject(res);
-				if(res.headers['request-path'] !== path) {
-					self.redirected = true;
+				if(!self.regex.test(res.headers['request-path'])) {
 					reject({redirect: res.headers['request-path']});
 				} else {
 					resolve(res.body);
