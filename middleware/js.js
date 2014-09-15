@@ -1,12 +1,12 @@
+var browserify = require('browserify');
 var watchify = require('watchify');
 var log = logger.child({module: 'assets', asset:'js'});
 
 module.exports = function(src, dest, excludeHbs) {
 	//Setup our cache, timestamp and watchify instance
 	var cache = '', time = new Date();
-	var w = watchify({
-		entries: src
-	});
+	var b = browserify(src, watchify.args);
+	var w = watchify(b);
 
 	//Run the initial bundle and listen for updates
 	bundle();

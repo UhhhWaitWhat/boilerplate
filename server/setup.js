@@ -12,8 +12,8 @@ module.exports = function() {
 		level: DEV ? 'trace' : 'info',
 		src: DEV
 	});
-	global.config = require('require-directory')(module, './config');
-	global.services = _(require('require-directory')(module, './services')).transform(function(obj, el, key) {
+	global.config = require('require-directory')(module, '../config');
+	global.services = _(require('require-directory')(module, '../services')).transform(function(obj, el, key) {
 		obj[key] = el();
 	}).value();
 };

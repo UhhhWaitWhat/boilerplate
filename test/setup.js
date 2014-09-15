@@ -8,5 +8,5 @@ before(function() {
 		name: 'Testing',
 		stream: es.map(function(a,b){b();})
 	});
-	global.config = dir(module, './config');
+	global.config = dir(module, '../config');
 });

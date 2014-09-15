@@ -121,12 +121,11 @@ module.exports = function(pth, url) {
 		if(this.path === url) {
 			this.body = yield compiledHelpers;
 			this.type = 'text/javascript';
-			return;
 		} else if(this.path === '/' && this.query.format === 'l') {
-			this.body = {layout: yield getLayout().string};
+			this.body = {layout: (yield getLayout()).string};
+		} else {
+			yield next;
 		}
-
-		yield next;
 	};
 };
 
@@ -154,7 +153,7 @@ function compileHelpers(pth) {
 
 //Register our handlebars helpers
 function assignHelpers(pth) {
-	var helpers = require('require-directory')(module, path.join(pth, 'helpers'));
+	var helpers = require('require-directory')(module, path.join('..', pth, 'helpers'));
 	_.each(helpers, function(helper, name) {
 		name = name.split('.')[0];
 		if(!hbs.helpers[name]) {

@@ -36,7 +36,7 @@ module.exports = function(destJs, destCss, destAssets) {
 		});
 
 		src.forEach(function(entry) {
-			var stream = fs.createReadStream(path.join(process.cwd(), entry));
+			var stream = fs.createReadStream(path.join(entry));
 
 			if(entry.substr(entry.length-3) === '.js') {
 				jsStream.append(stream);
