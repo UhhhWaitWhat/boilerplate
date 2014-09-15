@@ -30,7 +30,7 @@ function transition(from, to, cb) {
 
 //Determine if it is worth to diff the element or if we should replace it completely.
 function worthy(from, to, matrix) {
-	return levenshtein.distance(matrix) < from.children.length/2;
+	return levenshtein.distance(matrix)-1 < from.children.length/2;
 }
 
 //Transition the source element to a state of attribute equality with the target element by adding all neccessary attributes.
@@ -62,7 +62,7 @@ function diffChildren(childrenFrom, childrenTo, matrix, parent, cb) {
 		if(difference.type === ':') {
 			replace(from, to, cb);
 		} else if(difference.type === '+') {
-			insert(to, parent, difference.position);
+			insert(to, parent, difference.position, cb);
 		} else if(difference.type === '-') {
 			remove(from, cb);
 		} else if(difference.type === '=') {
