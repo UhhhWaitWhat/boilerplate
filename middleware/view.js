@@ -92,11 +92,6 @@ module.exports = function(pth, url) {
 				result.layoutData = data.layout;
 			}
 
-			if(this.request.query.format.indexOf('l') !== -1) {
-				result = result || {};
-				result.layout = layout.string;
-			}
-
 			if(this.request.query.format.indexOf('t') !== -1) {
 				result = result || {};
 				result.template = template.string;
@@ -127,6 +122,8 @@ module.exports = function(pth, url) {
 			this.body = yield compiledHelpers;
 			this.type = 'text/javascript';
 			return;
+		} else if(this.path === '/' && this.query.format === 'l') {
+			this.body = {layout: yield getLayout().string};
 		}
 
 		yield next;
