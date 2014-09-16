@@ -1,0 +1,11 @@
+{
+	"name": "boilerplate-dev",
+	"script": "index.js",
+	"args": "['start']",
+	"node_args": "--harmony",
+	"watch": true,
+	"env": {
+		"NODE_ENV": "development",
+		"PORT": "3000"
+	}
+}
