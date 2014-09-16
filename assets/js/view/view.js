@@ -1,6 +1,6 @@
 var bluebird = require('bluebird');
 var util = require('util');
-var EventEmitter = require('events').EventEmitter;
+var DetachedEventHandler = require('./detachedevents');
 var request = require('superagent');
 var page = require('page');
 var hbs = require('handlebars');
@@ -8,19 +8,18 @@ var ptr = require('path-to-regexp');
 var layout = require('./layout');
 var diff = require('./diff');
 
-//Our view class. `url` should either be the same as used in the backend (a express-like route, or a RegExp).
+//Our view class. `url` should either be the same as used in the backend (an express-like route, or a RegExp).
 //`requesturl` is only required if `url` is a regex, and is used to fetch the views template.
 function View(url, requesturl) {
-	EventEmitter.call(this);
+	DetachedEventHandler.call(this);
 	this.data = {};
 	this.url = BASEPATH + (requesturl || url);
 	this.regex = url instanceof RegExp ? url : ptr(url);
-	this.handlers = {};
-	this._template = this.fetchTemplate();
+	this._template = this._fetchTemplate();
 	this._transitions = [];
 }
 
-util.inherits(View, EventEmitter);
+util.inherits(View, DetachedEventHandler);
 
 //Calls the corresponding transition function
 View.prototype._transition = function(oldBody, newBody, from) {
@@ -58,7 +57,7 @@ View.prototype.render = function(from) {
 //Load new data and render the view
 View.prototype.load = function(path, from) {
 	var self = this;
-	return bluebird.join(this._template, this.fetchData(path)).then(function() {
+	return bluebird.join(this._template, this._fetchData(path)).then(function() {
 		self.emit('load');
 		return self.render(from);
 	}).then(function() {
@@ -72,26 +71,8 @@ View.prototype.load = function(path, from) {
 	});
 };
 
-//Attaches a new handler for a given type and selector
-View.prototype.attach = function(type, selector, handler) {
-	this.handlers[type] = this.handlers[type] || [];
-	this.handlers[type].push({
-		selector: selector,
-		handler: handler
-	});
-};
-
-//Call all handlers which match the event target and the given type
-View.prototype.handler = function(type, event) {
-	this.handlers[type].forEach(function(el) {
-		if(event.target.matches(el.selector)) {
-			el.handler.apply(event.target, event);
-		}
-	});
-};
-
 //Fetch template and attach it to the view in compiled form
-View.prototype.fetchTemplate = function() {
+View.prototype._fetchTemplate = function() {
 	var self = this;
 	return new Promise(function(resolve, reject) {
 		request
@@ -112,7 +93,7 @@ View.prototype.fetchTemplate = function() {
 };
 
 //Fetch data and attach it to our view
-View.prototype.fetchData = function(path) {
+View.prototype._fetchData = function(path) {
 	var self = this;
 	return new Promise(function(resolve, reject) {
 		request

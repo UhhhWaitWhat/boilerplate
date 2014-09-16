@@ -11,6 +11,6 @@ function view(name) {
 module.exports = function(app) {
 	app.use(R.get('/', view('home')));
 	app.use(R.get('/docs/written/:doc?', view('docs')));
-	app.use(R.get(/^\/docs\/generated(\/.*){0,1}/, view('docs-gen')));
+	app.use(R.get('/docs/generated/:doc*', view('docs-gen')));
 	app.use(R.get('/login', view('login')));
 };
