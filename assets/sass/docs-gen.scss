@@ -1,6 +1,6 @@
 @font-face {
-	font-family: 'Monaco';
-	src: url('monaco.ttf');
+	font-family: 'UbuntuMono';
+	src: url('UbuntuMono.ttf');
 }
 
 #wrapper {
@@ -50,7 +50,7 @@
 	padding: 0px 15px 16px 25px;
 	margin: 0px;
 	font-size: 12px;
-	font-family: Monaco, Consolas, "Lucida Console", monospace
+	font-family: UbuntuMono, monospace
 }
 
 .code code {
