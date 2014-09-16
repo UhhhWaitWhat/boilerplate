@@ -75,36 +75,44 @@ module.exports = function(pth, url) {
 
 	//Render a specific view
 	function* render(name, params) {
+		var data;
+		var self = this;
 		var layout = yield getLayout();
 		var template = yield getTemplate(name);
-		var data = {
-			layout: yield layout.fn.apply(this),
-			template: yield template.fn.apply(this, params)
-		};
-		data.layout.basepath = BASEPATH;
-
+		
 		//Assign data based on the request type
-		var result;
 		if(this.request.query.format) {
+			var result = {};
 			if(this.request.query.format.indexOf('d') !== -1) {
-				result = result || {};
+				data = yield getData();
 				result.data = data.template;
 				result.layoutData = data.layout;
 			}
 
 			if(this.request.query.format.indexOf('t') !== -1) {
-				result = result || {};
 				result.template = template.string;
 			}
+			this.body = result;
+		} else {
+			data = yield getData();
+			//Attach either the data or a rendered view
+			this.body = layout.frame({
+				basepath: BASEPATH,
+				body: layout.compiled(_.merge({
+					body: template.compiled(_.merge(data.template, {layout: data.layout}))
+				}, data.layout))
+			});
 		}
-	
-		//Attach either the data or a rendered view
-		this.body = result || layout.frame({
-			basepath: BASEPATH,
-			body: layout.compiled(_.merge({
-				body: template.compiled(_.merge(data.template, {layout: data.layout}))
-			}, data.layout))
-		});
+
+		function *getData() {
+			var data = {
+				layout: yield layout.fn.apply(self),
+				template: yield template.fn.apply(self, params)
+			};
+			data.layout.basepath = BASEPATH;
+
+			return data;
+		}
 	}
 
 	//Our middleware to attach a view
