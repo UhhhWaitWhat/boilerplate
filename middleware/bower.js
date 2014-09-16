@@ -53,7 +53,7 @@ module.exports = function(destJs, destCss, destAssets) {
 	//This is required, as we do not store bower assets relative to the bundled css
 	function rewriteUrl(filename) {
 		var regex = /url\(['"](.*?)['"]\)/g;
-		var basepath = filename.replace(bowerLoc, destAssets).split('/');
+		var basepath = filename.replace(bowerLoc, path.normalize(destAssets)).split(path.sep);
 			basepath.pop();
 			basepath = basepath.join('/');
 
@@ -83,8 +83,7 @@ module.exports = function(destJs, destCss, destAssets) {
 		} else {
 			var asset = path.join(bowerLoc, this.path.substr(destAssets.length));
 			if(this.path.substr(0, destAssets.length) === destAssets && files.indexOf(asset) !== -1) {
-				var pth = path.join(process.cwd(), asset);
-				yield send(this, pth);
+				yield send(this, asset);
 			} else {
 				yield next;
 			}
@@ -95,7 +94,8 @@ module.exports = function(destJs, destCss, destAssets) {
 //Find the location, of the directory, where bower stores its components
 function bowerLocation() {
 	try {
-		return JSON.parse(fs.readFileSync('.bowerrc', 'utf8')).directory;
+		var parsed = JSON.parse(fs.readFileSync('.bowerrc', 'utf8')).directory;
+		return path.join(process.cwd(), parsed);
 	} catch(e) {
 		return 'bower_components';
 	}

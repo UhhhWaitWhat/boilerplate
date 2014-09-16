@@ -18,6 +18,7 @@ module.exports = function(src, dest) {
 		sass.render({
 			file: src,
 			success: function(result) {
+				result = prefixUrls(result);
 				cache = prefixer.process(result).css;
 				time = new Date();
 				log.info('Recompiled sass (and added prefixes)');
@@ -25,6 +26,15 @@ module.exports = function(src, dest) {
 			error: function(err) {
 				log.error('Failed to compile sass', err);
 			}
+		});
+	}
+
+	//Rewrite root based urls in css files
+	function prefixUrls(data) {
+		var regex = /url\(['"](.*?)['"]\)/g;
+		return data.replace(regex, function() {
+			var src = arguments[1];
+			return 'url('+(src[0] === '/' ? BASEPATH : '')+src+')';
 		});
 	}
 
