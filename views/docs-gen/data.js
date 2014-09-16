@@ -9,16 +9,22 @@ var docco = require('docco');
 var paths = allFiles();
 var cache = {};
 
-module.exports = function *(pth) {
-	pth = pth || '';
+module.exports = function *() {
+	var pth = Array.prototype.slice.call(arguments, 0, arguments.length-1).join('');
 	var base = this.path.substring(0, this.path.length-pth.length);
 	if(pth[0] === '/') pth = pth.substring(1);
-	pth = path.normalize(pth);
+	pth = path.normalize(pth).split(path.sep).join('/');
 
-	var available = (yield paths);
-	if(available.indexOf(pth) === -1 && pth !== '.') {
-		this.status = 404;
+	var available = yield paths;
+	if(available.indexOf(pth) !== -1 || pth === '.') {
+		return yield run(pth);
+	} else if(available.indexOf(pth+'/') !== -1) {
+		return yield run(pth+'/');
 	} else {
+		this.status = 404;
+	}
+
+	function *run(pth) {
 		var children = yield generateChildren(pth);
 		return {
 			path: generateBreadcrumbs(pth, base),
@@ -97,7 +103,7 @@ function allFiles() {
 				return folders.concat(files);
 			});
 		}).then(function(files) {
-			return [files, gitignore];			
+			return [files, gitignore];
 		});
 	}).spread(multimatch);
 }
