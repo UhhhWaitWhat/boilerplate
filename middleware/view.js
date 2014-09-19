@@ -23,7 +23,7 @@ module.exports = function(pth, url) {
 				cache[name].fn = require(path.join(process.cwd(), pth, name, 'data.js'));
 			} catch(e) {
 				if(e.code !== 'MODULE_NOT_FOUND') {
-					log.warn(e, 'Failed to load `data.js`');
+					throw e;
 				}
 				cache[name].fn = function *() {};
 			}
