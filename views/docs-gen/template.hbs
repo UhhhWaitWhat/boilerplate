@@ -22,11 +22,11 @@
 			<ol class="breadcrumb">
 				{{#each path}}
 					<li diff-id="{{path}}">
-						{{#unless last}}
-							<a href="{{path}}{{#if last}}/{{/if}}">{{name}}</a>
+						{{#if last}}
+						<span>{{name}}</span>
 						{{else}}
-							<a href="{{path}}/">{{name}}</a>
-						{{/unless}}
+						<a href="{{path}}">{{name}}</a>
+						{{/if}}
 					</li>
 				{{/each}}
 			</ol>
