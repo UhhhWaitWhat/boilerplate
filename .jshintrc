@@ -5,6 +5,7 @@
 	"node": true,
 	"noyield": true,
 	"globals": {
+		"PORT": false,
 		"NAME": false,
 		"DEV": false,
 		"BASEPATH": false,
