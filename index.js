@@ -24,7 +24,7 @@ program
 		setup();
 		services.orm.then(function(ORM) {
 			//Query for username and password
-			inquirer.prompt([{type: 'string', name: 'name', message: 'Enter a username'}, {type: 'password', name: 'password', message: 'Enter a password:'}], function(data) {
+			inquirer.prompt([{type: 'string', name: 'name', message: 'Enter a username'}, {type: 'password', name: 'password', message: 'Enter a password'}], function(data) {
 				//Create the user
 				ORM.User.create({name: data.name, password: data.password}).then(function(user) {
 					console.log('Added User "' + user.name + '"!');
