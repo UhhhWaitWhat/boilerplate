@@ -21,9 +21,8 @@ app.use(require('koa-static')('./assets/static'));
 app.use(require('koa-polyfills')({path: '/js/deps/polyfills'}));
 app.use(require('koa-body-parser')());
 app.use(require('koa-generic-session')({store: new require('koa-redis')(config.session.redis)}));
-app.use(require('koa-passport').initialize());
-app.use(require('koa-passport').session());
-app.use(require('../middleware/passport')('/', '/login', '/logout'));
+app.use(services.passport.initialize());
+app.use(services.passport.session());
 
 //Bind our routes to our app
 require('./routes')(app);
@@ -32,4 +31,4 @@ require('./routes')(app);
 app.on('error', logger.koa.error.bind(logger));
 
 //Start our app
-app.listen(process.env.PORT || 3000);
+app.listen(PORT);
