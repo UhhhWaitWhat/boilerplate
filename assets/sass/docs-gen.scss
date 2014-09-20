@@ -14,7 +14,7 @@
 	transition: height 500ms;
 }
 
-#navigation>.panel:hover>.list-group {
+#navigation>.panel:hover>.list-group, #navigation>.panel>.list-group.open {
 	height: auto;
 }
 

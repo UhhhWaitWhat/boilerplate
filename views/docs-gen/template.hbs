@@ -8,12 +8,12 @@
 		<div id="navigation" class="col-sm-3">
 			<div class="panel panel-default">
 				<div diff-id="header" class="panel-heading">Children<span class="caret"></span></div>
-				<div diff-id="list" class="list-group anim">
+				<div diff-id="list" class="list-group anim {{#if folder}}open{{/if}}">
 				{{#each folders}}
 					<a diff-id="d{{name}}" href="{{name}}/" class="list-group-item"><span class="glyphicon glyphicon-folder-close"></span> {{name}}</a>
 				{{/each}}
 				{{#each files}}
-					<a diff-id="f{{name}}" href="{{name}}" class="list-group-item anim{{#if selected}} active{{/if}}"><span class="glyphicon glyphicon-file"></span> {{name}}</a>
+					<a diff-id="f{{name}}" href="{{name}}" class="list-group-item anim"><span class="glyphicon glyphicon-file"></span> {{name}}</a>
 				{{/each}}
 				</div>
 			</div>
