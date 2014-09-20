@@ -1,3 +1,9 @@
+.navbar-header button {
+	height: 40px;
+	border: none;
+	margin: 0;
+}
+
 .jumbotron {
 	position: relative;
 	padding: 30px;
@@ -33,7 +39,6 @@
 }
 
 .navbar {
-	height: 40px;
 	min-height: 40px;
 }
 
