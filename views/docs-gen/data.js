@@ -7,6 +7,7 @@ var path = require('path');
 var docco = require('docco');
 var cache = {};
 
+//Main middleware function
 module.exports = function *() {
 	var pth = Array.prototype.slice.call(arguments, 0, arguments.length-1).join('');
 	pth = path.normalize(pth);
@@ -24,6 +25,9 @@ module.exports = function *() {
 	return result;
 };
 
+//Do we have a valid file or folder?
+//We check if the file exists and, if it is a file, if it ends on `.js`
+//In addition it should not be part of our `.gitignore`
 function *valid(pth) {
 	var stat;
 	try {
@@ -39,14 +43,20 @@ function *valid(pth) {
 	}
 }
 
+//Return an object with all children for a given path
 function *generateChildren(pth) {
+	var folder = true;
+
+	//Normalize path to the nearest folder
 	pth = './'+pth;
 	if(path.extname(pth) === '.js') {
+		folder = false;
 		let parts = pth.split(path.sep);
 		parts.pop();
 		pth = parts.join(path.sep);
 	}
 
+	//Filter out anything on our gitignore
 	var git = yield gitignore;
 	var all = yield fs.readdirAsync(pth);
 	all = all.map(function(name) {
@@ -54,6 +64,7 @@ function *generateChildren(pth) {
 	});
 	all = multimatch(all, git);
 
+	//Get the stats to filter files from directories	
 	var stats = yield all.map(function(name) {
 		return fs.lstatAsync(name);
 	});
@@ -65,7 +76,9 @@ function *generateChildren(pth) {
 		return stats[i].isDirectory();
 	});
 
+	//Construct and return the object
 	return {
+		folder: folder,
 		files: files.map(function(file) {
 			return {
 				name: path.basename(file)
