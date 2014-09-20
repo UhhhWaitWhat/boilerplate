@@ -1,6 +1,6 @@
 ORM
 ===
-Your new application comes with a preconfigured ORM named [Waterline]().
+Your new application comes with a preconfigured ORM named [Waterline](https://github.com/balderdashy/waterline).
 Waterline is a 3rd-party product, so you should read their docs in regards to how it works, which can be found at https://github.com/balderdashy/waterline-docs.
 
 Adapter Config

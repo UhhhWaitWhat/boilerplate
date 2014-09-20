@@ -1,6 +1,6 @@
 Logging
 =======
-Your application comes preconfigured with a [bunyan]() logger assigned to a global `logger` variable. It outputs everything to stdout, so you can either direct the output to a log or directly to bunyan's executable.
+Your application comes preconfigured with a [bunyan](https://github.com/trentm/node-bunyan) logger assigned to a global `logger` variable. It outputs everything to stdout, so you can either direct the output to a log or directly to bunyan's executable.
 
 Normally I would advise against using globals, but in the case of this application, which is not consumed by anything, I think the benefits of having a globally available logger outweigh the disadvantages of using globals.
 

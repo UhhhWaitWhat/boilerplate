@@ -12,3 +12,12 @@ After all a full server start in production mode, with logging output on the com
 	NODE_ENV='production' node --harmony index.js start | bunyan
 
 To make this a little simpler, you can also call `npm start` and `npm run-script add` respectively.
+
+PM2
+---
+If you plan to use the [pm2](https://github.com/Unitech/pm2) process managing system, you might find the files `pm2/dev.json` and `pm2/production.json` useful. They can be started by pm2 and contain the neccessary infos to get your application up and running.
+You can basically do
+
+	pm2 start pm2/dev.json
+
+And get a running application which runs in development mode and is reloaded on file changes.
