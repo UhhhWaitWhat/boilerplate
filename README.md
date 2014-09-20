@@ -12,11 +12,14 @@ Features
 --------
 * Based on [Koa](http://koajs.com/)
 * Client-/Server-side view rendering via [Handlebars](http://handlebarsjs.com/)
+	* View Diffing for minimal updates upon changes. Supports css transitions
 * Integrated [Waterline](https://github.com/balderdashy/waterline) ORM
 * Dynamic asset compiling and serving
 * Integrated [Bunyan](https://github.com/trentm/node-bunyan) logger
 * [Passport](http://passportjs.org/) integration already set up
 * [Redis](http://redis.io/) session store
+* Self documenting using [docco](http://jashkenas.github.io/docco/) in addition to markdown documentation
+* Existing configuration for [jshint](http://www.jshint.com/), [Travis CI](https://travis-ci.org/), [bower](http://bower.io/) and [pm2](https://github.com/Unitech/pm2)
 
 Getting started
 ---------------

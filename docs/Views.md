@@ -12,22 +12,24 @@ Some of these features are a little complex, so if you run into any problems und
 
 Helpers
 -------
-Handlebars helpers can be defined `views/helpers`. Each file should export a single function, which will be registered as a handlebars helper. The name of the helper is derived from the file name. These helpers can be included on the client side by including the `/js/helpers` path.
+Handlebars helpers can be defined in `views/helpers`. Each file should export a single function, which will be registered as a handlebars helper. The name of the helper is derived from the file name. These helpers can be included on the client side by including the `/js/helpers` path.
 
 Server-Side
 -----------
 ###Layout/Frame
 #### Frame
 The first thing we have to do is define those parts which should not be touched by our client-side rendering (Everything outside of our `body` tag). For this you have a file named `frame.hbs` located in your `views` folder. Its contents should at its most minimal look something like this:
-``` html
+``` handlebars
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Boilerplate</title>
-		<script src="/js/deps"></script>
-		<script src="/js/helpers"></script>
-		<script src="/js"></script>
-		<link rel="stylesheet" href="/css">
+		<script src="{{basepath}}/js/deps/polyfills"></script>
+		<script src="{{basepath}}/js/deps"></script>
+		<script src="{{basepath}}/js/helpers"></script>
+		<script src="{{basepath}}/js"></script>
+		<link rel="stylesheet" href="{{basepath}}/css/deps">
+		<link rel="stylesheet" href="{{basepath}}/css">
 	</head>
 	<body>
 		{{{body}}}
@@ -64,32 +66,21 @@ module.exports = function *() {
 Views are defined similarly to your layout. Each view should have its own directory within the `views` folder, which then contains a `data.js` and a `template.hbs` file. The `data.js` should provide the views data in the same way as the `layout.js`. When the `template.hbs` file is rendered, it is provided with the data from `data.js` as well as a top-level property named `layout` which contanis the layouts data.
 
 #### Rendering
-To render a view, you can call `yield this.view(name)` within any koa middleware. This will render the template located at `view/name/template.hbs` into your layout and your frame and serve it as a static HTML page. If a `format` URL parameter is set, it may respond differently (with the raw template or the data in JSON format) which is used by our client-side rendering. If you want more information on this, check our custom `view` middleware at `middleware/view.js`.
+To render a view, you can call `yield this.view("name")` within any koa middleware. This will render the template located at `view/name/template.hbs` into your layout and your frame and serve it as a static HTML page. If a `format` URL parameter is set, it may respond differently (with the raw template or the data in JSON format) which is used by our client-side rendering. If you want more information on this, check our custom `view` middleware at `middleware/view.js`.
 
 Client-Side
 -----------
-You can find the client side rendering code in the `assets/js/view` folder. This folder contains two files which are important for you, `page.js` and `view.js`. `view.js` contains a class to instanciate your views with, and `page.js` exports functions attach these views to a router.
+You can find the client side rendering code in the `assets/js/view` folder. The files `view.js` and `page.js` export constructors for views and a router respectively. The basic concept is, to instantiated views as needed and then attach them to the router. As the `assets/js/index.js` is the entry point for your javascript bundle, you should declare your views there.
 
 ### View-Object
-A view object can be instantiated like so:
+A view contains information about the routes it needs to attach to. In addition it caches the views template, so the site only needs to load the data on subsequent requests. In addition, the view emits events on load etc. If you have no need for events on a specific view, and the view is static (no dynamic parts etc.), you may omit declaring it explicitly. The router will create a new view for an unknown url on the fly.
 
-	var View = require('./view/view');
-	var view = new View('/route');
+#### Instantiation
+The constructor takes as its first argument either a string or a RegExp object. This will be used to match the routes. Strings may be in the same format as those for your koa-router, allowing you to use the exact same routes as on your server. If you have parameterized routes (or use a regex), you *may* run into problems fetching the view template. If you do, you may provide a valid url for your view as the second argument.
 
-This view can then be attached to our client side router like this:
-
-	var page = require('./view/page');
-	page.attach(view);
-	//You could also use a shorthand like this
-	page.attach('/route2');
-
-And finally, once you have all your routes attached, you start your router:
-
-	page.init();
-
-If you don't do any of this, your page will still work, but as a static site. But if you choose to use your new router, every view you create and attach will be loaded internally as template and data and will be rendered on the client side. This allows us to provide smoother transitions and faster load times for the user. Our router is based on [page.js](https://github.com/visionmedia/page.js) and so it takes care of redirects, as well as replacing links on your page, so after calling `page.init()` you do not have to care about routing anymore.
-
-If you do not create/attach a view to any routes, but still call `page.init()`, views will be created for you on the fly for any non-bound routes. So if your view contains no client-side logic and you do not need the optimisation provided by caching layouts for parameterized routes, you do not have to care about it at all.
+**Examples:**
+	var view = new View('/route/:param?');
+	var view2 = new View(/^\/route/, '/route');
 
 #### Instance-Methods
 ##### render()
@@ -98,11 +89,10 @@ Renders and inserts the view without fetching data. Also takes care of the layou
 ##### load()
 Loads new data and then calls `render()`
 
-##### attach(type, selector, handler)
+##### onDetached(type, selector, handler, bubbling)
 Attach EventListeners to the DOM. See below at DOM-Events for usage.
 
-### Events
-#### View
+#### Events
 Your `View` objects act as node EventEmitters and provide the following events:
 * load: Called after new data is received from the server
 * loaded: Called after the view with the new data was rendered
@@ -112,8 +102,20 @@ Your `View` objects act as node EventEmitters and provide the following events:
 #### DOM-Events
 Due to fact, that we do not insert the entirety of each view on each render, but use our own diffing algorithm, directly working with DOM-events becomes a little more tricky. If you attach new handlers on render you might attach them twice. Providing events to disattach them seemed needlessly complicated and inefficient, so instead each view provides you with an `attach(type, selector, handler)` function. You should provide the type of event (e.g. `click`) you want to bind to, a selector which matches all elements to handle, and a handler function. This handler function will then be called as you would expect, with `this` set to the emitting event and the event object passed as the first argument.
 Internally this works by attaching a handler to the `body` element and then letting events bubble, filtering out those matched by the selector and calling your handlers with the corresponding arguments.
+The bubbling parameter decides if an event should be triggered even if the matching element is between the source and the document. This defaults to true, and helps if you e.g. want to trigger click events on child elements as well.
+
+#### Example (`assets/js/index.js`)
+
+	var Page = require('./view/page');
+	var View = require('./view/view');
+
+	var page = new Page();
+	var view = new View('/route');
+
+	page.attach(view);
+	page.init();
 
 ### Diffing
-As I wrote before, rendered views are not simply inserted but run through a diffing algorithm against the current document. Normally you should not need to worry about this, but the code can be found in `assets/js/view/diff.js` in case you want (or need) to take a look.
+As stated above, rendered views are not simply inserted but run through a diffing algorithm against the current document. Normally you should not need to worry about this, but the code can be found in `assets/js/view/diff.js` in case you want (or need) to take a look.
 
 In addition, the basic algorithm is provided as its own documentation in `Diffing.md`
