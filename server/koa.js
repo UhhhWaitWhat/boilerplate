@@ -5,6 +5,7 @@ logger.koa = global.logger.child({module: 'koa'});
 var app = require('koa')();
 app.keys = config.session.keys;
 app.name = NAME;
+app.env = DEV ? 'development' : 'production';
 
 //Bind all our middleware to our application
 app.use(require('../middleware/basepath'));
@@ -32,3 +33,4 @@ app.on('error', logger.koa.error.bind(logger));
 
 //Start our app
 app.listen(PORT);
+logger.koa.info('Started server', {port: PORT});

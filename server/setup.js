@@ -19,4 +19,6 @@ module.exports = function() {
 	global.services = _(dir(module, '../services')).transform(function(obj, el, key) {
 		obj[key] = el();
 	}).value();
+
+	logger.info('Setup completed');
 };

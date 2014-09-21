@@ -32,6 +32,7 @@ module.exports = function(pth, url) {
 		//Check the timestamp if we need to reload the template
 		var stats = yield thunkify(fs.lstat)(path.join(process.cwd(), pth, name, 'template.hbs'));
 		if(new Date(stats.mtime) > new Date(cache[name].time)) {
+			log.debug('Reloading template.hbs from disk', {view: name});
 			var template = yield thunkify(fs.readFile)(path.join(process.cwd(), pth, name, 'template.hbs'), 'utf8');
 			cache[name].compiled = hbs.compile(template);
 			cache[name].string = template;
@@ -47,8 +48,10 @@ module.exports = function(pth, url) {
 		if(!layoutCache.fn) {
 			try {
 				layoutCache.fn = require(path.join(process.cwd(), pth, 'layout.js'));
+				log.debug('layout.js loaded');
 			} catch(e) {
 				layoutCache.fn = function(cb) {cb();};
+				log.debug('No layout.js file found');
 			}
 		}
 
@@ -61,11 +64,13 @@ module.exports = function(pth, url) {
 		//Compare the times
 		layoutCache.times = layoutCache.times || {layout: 0, frame: 0};
 		if(new Date(stats.layout.mtime) > new Date(layoutCache.times.layout)) {
+			log.debug('Reloading layout.hbs from disk');
 			layoutCache.times.layout = stats.layout.mtime;
 			layoutCache.string = yield thunkify(fs.readFile)(path.join(process.cwd(), pth, 'layout.hbs'), 'utf8');
 			layoutCache.compiled = hbs.compile(layoutCache.string);
 		}
 		if(new Date(stats.frame.mtime) > new Date(layoutCache.times.frame)) {
+			log.debug('Reloading frame.hbs from disk');
 			layoutCache.times.frame = stats.frame.mtime;
 			layoutCache.frame = hbs.compile(yield thunkify(fs.readFile)(path.join(process.cwd(), pth, 'frame.hbs'), 'utf8'));
 		}
@@ -79,6 +84,7 @@ module.exports = function(pth, url) {
 		var self = this;
 		var layout = yield getLayout();
 		var template = yield getTemplate(name);
+		log.info('Rendering view', {view: name, format: this.request.query.format});
 		
 		//Assign data based on the request type
 		if(this.request.query.format) {
@@ -130,6 +136,7 @@ module.exports = function(pth, url) {
 			this.body = yield compiledHelpers;
 			this.type = 'text/javascript';
 		} else if(this.path === '/' && this.query.format === 'l') {
+			//Always send our layout if requested on our root path
 			this.body = {layout: (yield getLayout()).string};
 		} else {
 			yield next;
@@ -151,8 +158,10 @@ function compileHelpers(pth) {
 		b.require('handlebars');
 		b.bundle(function(err, src) {
 			if(err) {
+				log.warn('Failed to compile handlebars helpers', err);
 				reject(err);
 			} else {
+				log.info('Compiled helpers to be served to the client');
 				resolve(src);
 			}
 		});
