@@ -33,4 +33,4 @@ app.on('error', logger.koa.error.bind(logger));
 
 //Start our app
 app.listen(PORT);
-logger.koa.info('Started server', {port: PORT});
+logger.koa.info({port: PORT, mode: DEV ? 'development' : 'production'}, 'Started server');

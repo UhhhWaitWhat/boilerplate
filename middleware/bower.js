@@ -13,9 +13,11 @@ module.exports = function(destJs, destCss, destAssets) {
 
 	//Create the bundles for the first time and watch the bower location for changes
 	bundle();
-	watch(bowerLoc, function() {
-		bundle();
-	});
+	if(DEV) {
+		watch(bowerLoc, function() {
+			bundle();
+		});
+	}
 
 	//Bundle our files together into the smallest possible outputs.
 	//We create streams to combine all files and then pipe those into a concatstream.

@@ -9,9 +9,11 @@ module.exports = function(src, dest) {
 
 	//Render initially and watch our directory for updates.
 	render();
-	watch(path.dirname(src), function() {
-		render();
-	});
+	if(DEV) {
+		watch(path.dirname(src), function() {
+			render();
+		});
+	}
 
 	//Render our file and run the prefixer on success. Also update the timestamp for caching
 	function render() {
