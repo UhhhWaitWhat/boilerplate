@@ -20,9 +20,9 @@ module.exports = function(src, dest, excludeHbs) {
 			if(!err) {
 				cache = 'BASEPATH=\''+BASEPATH+'\';' + bundle;
 				time = new Date();
-				log.info('Rebuilt js bundle');
+				log.debug('Rebuilt js bundle');
 			} else {
-				log.warn('Failed to build js bundle', err);
+				log.warn(err, 'Failed to build js bundle');
 			}
 		});
 	}

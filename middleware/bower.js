@@ -6,6 +6,7 @@ var combinedStream = require('combined-stream');
 var concatStream = require('concat-stream');
 var es = require('event-stream');
 var send = require('koa-send');
+var log = logger.child({module: 'assets', asset:'bower'});
 
 module.exports = function(destJs, destCss, destAssets) {
 	var files = [], js = '', css = '', time = new Date(), bowerLoc = bowerLocation();
@@ -26,11 +27,13 @@ module.exports = function(destJs, destCss, destAssets) {
 		var cssStream = combinedStream.create();
 
 		var jsConcat = concatStream(function(data) {
+			log.debug('Rebuilt bower js bundle');
 			js = data.toString();
 			time = new Date();
 		});
 
 		var cssConcat = concatStream(function(data) {
+			log.debug('Rebuilt bower css bundle');
 			css = data.toString();
 			time = new Date();
 		});

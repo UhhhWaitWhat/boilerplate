@@ -21,10 +21,10 @@ module.exports = function(src, dest) {
 				result = prefixUrls(result);
 				cache = prefixer.process(result).css;
 				time = new Date();
-				log.info('Recompiled sass (and added prefixes)');
+				log.debug('Recompiled sass (and added prefixes)');
 			},
 			error: function(err) {
-				log.error('Failed to compile sass', err);
+				log.error(err, 'Failed to compile sass');
 			}
 		});
 	}
