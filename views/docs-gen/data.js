@@ -36,10 +36,11 @@ function *valid(pth) {
 		return false;
 	}
 
+	if(pth === '.') return true;
 	if(!stat.isDirectory() && !(stat.isFile() && path.extname(pth) === '.js')) {
 		return false;
 	} else {
-		return multimatch([pth], yield gitignore);
+		return multimatch([pth], yield gitignore, {dot: true}).length>0;
 	}
 }
 
@@ -62,7 +63,7 @@ function *generateChildren(pth) {
 	all = all.map(function(name) {
 		return path.join(pth, name);
 	});
-	all = multimatch(all, git);
+	all = multimatch(all, git, {dot: true});
 
 	//Get the stats to filter files from directories	
 	var stats = yield all.map(function(name) {
