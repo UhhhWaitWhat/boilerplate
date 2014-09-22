@@ -1,90 +1,28 @@
 var hbs = require('handlebars');
-var thunkify = require('thunkify');
-var fs = require('fs');
+var bluebird = require('bluebird');
+var fs = bluebird.promisifyAll(require('fs'));
 var path = require('path');
 var browserify = require('browserify');
 var es = require('event-stream');
 var _ = require('lodash');
 var log = logger.child({module: 'views'});
+var Cacher = require('../utils/cacher');
 
 module.exports = function(pth, url) {
 	assignHelpers(pth);
 	var compiledHelpers = compileHelpers(pth);
-	var cache = {};
-	var layoutCache = {};
 
-	//Fetch a template for a specific name. If it changed, load it from disk again
-	function* getTemplate(name) {
-		cache[name] = cache[name] || {time: 0};
-
-		//Load the data function if available
-		if(!cache[name].fn) {
-			try {
-				cache[name].fn = require(path.join(process.cwd(), pth, name, 'data.js'));
-			} catch(e) {
-				if(e.code !== 'MODULE_NOT_FOUND') {
-					throw e;
-				}
-				cache[name].fn = function *() {};
-			}
-		}
-
-		//Check the timestamp if we need to reload the template
-		var stats = yield thunkify(fs.lstat)(path.join(process.cwd(), pth, name, 'template.hbs'));
-		if(new Date(stats.mtime) > new Date(cache[name].time)) {
-			log.debug('Reloading template.hbs from disk', {view: name});
-			var template = yield thunkify(fs.readFile)(path.join(process.cwd(), pth, name, 'template.hbs'), 'utf8');
-			cache[name].compiled = hbs.compile(template);
-			cache[name].string = template;
-			cache[name].time = stats.mtime;
-		}
-
-		return cache[name];
-	}
-
-	//Fetch the layout and load from disk if changed
-	function* getLayout() {
-		//Load the data function if available
-		if(!layoutCache.fn) {
-			try {
-				layoutCache.fn = require(path.join(process.cwd(), pth, 'layout.js'));
-				log.debug('layout.js loaded');
-			} catch(e) {
-				layoutCache.fn = function(cb) {cb();};
-				log.debug('No layout.js file found');
-			}
-		}
-
-		//Check for timestamps and update if needed
-		var stats = {
-			layout: yield thunkify(fs.lstat)(path.join(process.cwd(), pth, 'layout.hbs')),
-			frame: yield thunkify(fs.lstat)(path.join(process.cwd(), pth, 'frame.hbs'))
-		};
-
-		//Compare the times
-		layoutCache.times = layoutCache.times || {layout: 0, frame: 0};
-		if(new Date(stats.layout.mtime) > new Date(layoutCache.times.layout)) {
-			log.debug('Reloading layout.hbs from disk');
-			layoutCache.times.layout = stats.layout.mtime;
-			layoutCache.string = yield thunkify(fs.readFile)(path.join(process.cwd(), pth, 'layout.hbs'), 'utf8');
-			layoutCache.compiled = hbs.compile(layoutCache.string);
-		}
-		if(new Date(stats.frame.mtime) > new Date(layoutCache.times.frame)) {
-			log.debug('Reloading frame.hbs from disk');
-			layoutCache.times.frame = stats.frame.mtime;
-			layoutCache.frame = hbs.compile(yield thunkify(fs.readFile)(path.join(process.cwd(), pth, 'frame.hbs'), 'utf8'));
-		}
-
-		return layoutCache;
-	}
+	//Create our caches
+	var cache = new Cacher.Multi(fetchTemplate.bind(null, pth), checkTemplate.bind(null, pth));
+	var layoutCache = new Cacher(fetchLayout.bind(null, pth), checkLayout.bind(null, pth));
 
 	//Render a specific view
 	function* render(name, params) {
 		var data;
 		var self = this;
-		var layout = yield getLayout();
-		var template = yield getTemplate(name);
-		log.info('Rendering view', {view: name, format: this.request.query.format});
+		var layout = yield layoutCache.get();
+		var template = yield cache.get(name);
+		log.info({view: name, format: this.request.query.format}, 'Rendering view');
 		
 		//Assign data based on the request type
 		if(this.request.query.format) {
@@ -104,7 +42,7 @@ module.exports = function(pth, url) {
 			//Attach either the data or a rendered view
 			this.body = layout.frame({
 				basepath: BASEPATH,
-				body: layout.compiled(_.merge({
+				body: layout.layout(_.merge({
 					body: template.compiled(_.merge(data.template, {layout: data.layout}))
 				}, data.layout))
 			});
@@ -137,7 +75,7 @@ module.exports = function(pth, url) {
 			this.type = 'text/javascript';
 		} else if(this.path === '/' && this.query.format === 'l') {
 			//Always send our layout if requested on our root path
-			this.body = {layout: (yield getLayout()).string};
+			this.body = {layout: (yield layoutCache.get()).string};
 		} else {
 			yield next;
 		}
@@ -158,10 +96,10 @@ function compileHelpers(pth) {
 		b.require('handlebars');
 		b.bundle(function(err, src) {
 			if(err) {
-				log.warn('Failed to compile handlebars helpers', err);
+				log.warn(err, 'Failed to compile handlebars helpers');
 				reject(err);
 			} else {
-				log.info('Compiled helpers to be served to the client');
+				log.debug('Compiled helpers to be served to the client');
 				resolve(src);
 			}
 		});
@@ -175,7 +113,76 @@ function assignHelpers(pth) {
 		name = name.split('.')[0];
 		if(!hbs.helpers[name]) {
 			hbs.registerHelper(name, helper);
-			log.info('Loaded helper "' + name + '"');
+			log.debug({name: name}, 'Loaded helper');
 		}
 	});
+}
+
+//Load a template from disk, compile and return it
+function *fetchTemplate(pth, name, prev) {
+	var fn;
+	log.debug({view: name}, 'Loading template.hbs from disk');
+
+	if(prev && prev.fn) {
+		fn = prev.fn;
+	} else {
+		try {
+			fn = require(path.join(process.cwd(), pth, name, 'data.js'));
+		} catch(e) {
+			if(e.code !== 'MODULE_NOT_FOUND') {
+				throw e;
+			}
+			fn = function *() {};
+		}
+	}
+
+	var template = yield fs.readFileAsync(path.join(process.cwd(), pth, name, 'template.hbs'), 'utf8');
+	return {
+		fn: fn,
+		string: template,
+		compiled: hbs.compile(template)
+	};
+}
+
+//Get the time for a template
+function *checkTemplate(pth, name) {
+	var stats = yield fs.lstatAsync(path.join(process.cwd(), pth, name, 'template.hbs'));
+	return stats.mtime;		
+}
+
+//Load the layout from disk, 
+function *fetchLayout(pth, prev) {
+	var fn;
+	
+	if(prev && prev.fn) {
+		fn = prev.fn;
+	} else {
+		try {
+			fn = require(path.join(process.cwd(), pth, 'layout.js'));
+			log.debug('layout.js loaded');
+		} catch(e) {
+			fn = function(cb) {cb();};
+			log.debug('No layout.js file found');
+		}
+	}
+
+	log.debug('Reloading layout.hbs from disk');
+	log.debug('Reloading frame.hbs from disk');
+	var layout = yield fs.readFileAsync(path.join(process.cwd(), pth, 'layout.hbs'), 'utf8');
+	var frame = yield fs.readFileAsync(path.join(process.cwd(), pth, 'frame.hbs'), 'utf8');
+
+	return {
+		fn: fn,
+		string: layout,
+		layout: hbs.compile(layout),
+		frame: hbs.compile(frame)
+	};		
+}
+
+//Get the last modified time of the layout
+function *checkLayout(pth) {
+	var layout = fs.lstatAsync(path.join(process.cwd(), pth, 'layout.hbs'));
+	var frame = fs.lstatAsync(path.join(process.cwd(), pth, 'frame.hbs'));
+
+	return Math.max(layout.mtime, frame.mtime);
 }
